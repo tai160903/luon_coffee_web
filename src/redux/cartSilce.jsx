@@ -11,6 +11,20 @@ const saveCartToStorage = (cartItems) => {
   }
 };
 
+// Helper function to load cart from localStorage
+const loadCartFromStorage = () => {
+  if (typeof window !== "undefined") {
+    try {
+      const data = localStorage.getItem("cart");
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error("Error loading cart from localStorage:", error);
+      return [];
+    }
+  }
+  return [];
+};
+
 // Initial state
 const initialState = {
   id: null,
@@ -271,14 +285,30 @@ const cartSlice = createSlice({
       state.finalTotal = state.totalAmount - (state.discount?.value || 0);
     },
 
-    // Set cart ID or customer ID (for backend sync)
+    // Set cart info from API or backend (overwrite all cart data)
     setCartInfo: (state, action) => {
-      if (action.payload.id) {
-        state.id = action.payload.id;
+      const payload = action.payload;
+      if (Array.isArray(payload.cartItems)) {
+        state.cartItems = payload.cartItems;
+        if (payload.id) state.id = payload.id;
+        if (payload.customerId) state.customerId = payload.customerId;
+        if (payload.totalAmount) state.totalAmount = payload.totalAmount;
+        if (payload.totalQuantity) state.totalQuantity = payload.totalQuantity;
+        if (payload.discount) state.discount = payload.discount;
+        if (payload.finalTotal) state.finalTotal = payload.finalTotal;
+      } else {
+        // fallback: empty cart
+        state.cartItems = [];
+        state.id = null;
+        state.customerId = null;
+        state.totalAmount = 0;
+        state.totalQuantity = 0;
+        state.discount = null;
+        state.finalTotal = 0;
       }
-      if (action.payload.customerId) {
-        state.customerId = action.payload.customerId;
-      }
+
+      // Save to localStorage
+      saveCartToStorage(state.cartItems);
     },
   },
 });

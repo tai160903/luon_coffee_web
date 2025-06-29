@@ -57,20 +57,21 @@ const Cart = () => {
   const [selectedPickupTime, setSelectedPickupTime] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
-  const [orderNotes, setOrderNotes] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchCart();
   }, []);
 
   const fetchCart = async () => {
+    setIsLoading(true);
     try {
       const response = await cartService.getCart();
-      console.log("Fetched cart items:", response.data.cartItems);
       setCartItems(response.data.cartItems || []);
     } catch (error) {
       console.error("Error fetching cart:", error);
     }
+    setIsLoading(false);
   };
 
   // Generate next 7 days
@@ -195,11 +196,23 @@ const Cart = () => {
         selectedPickupDate && selectedPickupTime
           ? `${selectedPickupDate}T${selectedPickupTime}`
           : "",
-      orderNotes,
       promoCode: promoApplied ? "WELCOME10" : null,
     };
     localStorage.setItem("orderData", JSON.stringify(orderData));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-amber-50">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <div className="text-lg text-amber-700 font-semibold">
+            Đang tải giỏ hàng...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -449,24 +462,6 @@ const Cart = () => {
                     * Cần ít nhất 30 phút để chuẩn bị đơn hàng
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {/* Order Notes */}
-            <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Ghi Chú Đơn Hàng
-              </h3>
-              <textarea
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder="Thêm ghi chú cho toàn bộ đơn hàng (tùy chọn)"
-                className="w-full p-4 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none resize-none"
-                rows={3}
-                maxLength={200}
-              />
-              <div className="text-xs text-gray-500 text-right mt-2">
-                {orderNotes.length}/200 ký tự
               </div>
             </div>
           </div>

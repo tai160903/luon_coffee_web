@@ -6,6 +6,8 @@ import { Eye, EyeOff, Coffee, User, Lock, ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import { toast, Toaster } from "sonner";
+import cartService from "../services/cart.service";
+import { setCartInfo } from "../redux/cartSilce";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -61,19 +63,30 @@ const Login = () => {
 
     setIsLoading(true);
 
-    // Use Sonner's promise toast for handling async operations
     toast.promise(
       dispatch(
         login({ username: formData.username, password: formData.password })
       ),
       {
         loading: "Đang đăng nhập...",
-        success: (response) => {
-          if (response.meta.requestStatus === "fulfilled") {
+        success: async (response) => {
+          // Check login success by status code (should be 200)
+          if (
+            response.meta.requestStatus === "fulfilled" &&
+            response.payload.status === 200
+          ) {
+            try {
+              const res = await cartService.getCart();
+              if (res && res?.data) {
+                dispatch(setCartInfo(res?.data));
+              }
+            } catch (err) {
+              toast.error("Không thể tải giỏ hàng, vui lòng thử lại sau.");
+            }
             setTimeout(() => navigate("/menu"), 500);
             return "Đăng nhập thành công!";
           } else {
-            throw new Error(response.payload || "Đăng nhập thất bại");
+            throw new Error("Đăng nhập thất bại");
           }
         },
         error: (err) => {

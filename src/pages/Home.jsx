@@ -275,7 +275,7 @@ function Home() {
                   ))}
                 </div>
                 <p className="text-gray-700 italic mb-8 text-lg leading-relaxed">
-                  "{testimonial.quote}"
+                  {testimonial.quote}
                 </p>
                 <div className="flex items-center">
                   <div className="w-14 h-14 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full flex items-center justify-center mr-4">

@@ -62,7 +62,6 @@ const Payment = () => {
     }
   }, []);
 
-  console.log("Order Data:", orderData);
   const paymentMethods = [
     {
       id: "wallet",
@@ -122,6 +121,7 @@ const Payment = () => {
         response = await paymentService.payWithWallet(payload);
       } else if (paymentMethod === "payos") {
         response = await paymentService.payWithPayOS(payload);
+        window.location.replace(response.paymentUrl);
       }
 
       setIsProcessing(false);

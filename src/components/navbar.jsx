@@ -41,6 +41,7 @@ const Navbar = () => {
 
   // Get cart items from Redux
   const cartItems = useSelector((state) => state.cart.cartItems);
+  console.log("Cart items:", cartItems);
   const cartCount = cartItems?.length || 0;
 
   const walletBalance = user?.wallet || 0;

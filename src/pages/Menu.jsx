@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
   Cookie,
   ArrowRight,
+  Loader,
 } from "lucide-react";
 import ProductService from "../services/product.service";
 import formatCurrency from "../utils/formatCurrency";
@@ -15,12 +16,14 @@ import formatCurrency from "../utils/formatCurrency";
 function Menu() {
   const [activeCategory, setActiveCategory] = useState("coffee");
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
+    setIsLoading(true);
     try {
       const response = await ProductService.getProducts();
       setProducts(response.data);
@@ -28,6 +31,7 @@ function Menu() {
       console.error("Error fetching products:", error.message);
       setProducts([]);
     }
+    setIsLoading(false);
   };
 
   console.log("Products:", products);
@@ -240,6 +244,19 @@ function Menu() {
     (item) => item.category === activeCategory
   );
   const activecat = categories.find((cat) => cat.id === activeCategory);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-amber-50">
+        <div className="flex flex-col items-center">
+          <Loader className="w-12 h-12 text-amber-400 animate-spin mb-4" />
+          <div className="text-lg text-amber-700 font-semibold">
+            Đang tải thực đơn...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50 min-h-screen">

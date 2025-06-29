@@ -20,6 +20,7 @@ import DashboardPOS from "../pages/pos/DashboardPOS";
 import Orders from "../pages/pos/Orders";
 import Reports from "../pages/pos/Reports";
 import Sales from "../pages/pos/Sales";
+import POSLayout from "../components/posLayout";
 
 const router = createBrowserRouter([
   {
@@ -96,6 +97,7 @@ const router = createBrowserRouter([
   // },
   {
     path: "/pos",
+    element: <POSLayout />,
     children: [
       {
         path: "",

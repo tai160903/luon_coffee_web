@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Plus,
@@ -19,9 +19,12 @@ import {
   X,
   Filter,
 } from "lucide-react";
+import ProductService from "../../services/product.service";
+import sizeService from "../../services/size.service";
+import formatCurrency from "../../utils/formatCurrency";
 
 const POS = () => {
-  const [activeCategory, setActiveCategory] = useState("coffee");
+  const [activeCategory, setActiveCategory] = useState("");
   const [currentOrder, setCurrentOrder] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [customerInfo, setCustomerInfo] = useState({
@@ -30,8 +33,27 @@ const POS = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [tableNumber, setTableNumber] = useState(""); // Thêm state cho số bàn
+
+  // Thêm state cho tuỳ chỉnh giống trang Detail
+  const [sizes, setSizes] = useState([]);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
+
+  // Giả lập size cho demo (có thể lấy từ API nếu có)
 
   const categories = [
+    {
+      id: "",
+      name: "Tất cả",
+      icon: Coffee, // Hoặc chọn icon phù hợp, ví dụ: Grid hoặc Layers
+      color: "from-gray-400 to-gray-600",
+    },
     {
       id: "coffee",
       name: "Cà Phê",
@@ -58,68 +80,6 @@ const POS = () => {
     },
   ];
 
-  const menuItems = [
-    // Coffee
-    {
-      id: 1,
-      category: "coffee",
-      name: "Cà Phê Phin",
-      price: 25000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-      id: 2,
-      category: "coffee",
-      name: "Cà Phê Đá",
-      price: 28000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-      id: 3,
-      category: "coffee",
-      name: "Cà Phê Dừa",
-      price: 32000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-      id: 4,
-      category: "coffee",
-      name: "Cà Phê Trứng",
-      price: 35000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    // Tea
-    {
-      id: 5,
-      category: "tea",
-      name: "Trà Xanh",
-      price: 20000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-      id: 6,
-      category: "tea",
-      name: "Trà Sen",
-      price: 25000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    // Food
-    {
-      id: 7,
-      category: "food",
-      name: "Bánh Mì Thịt Nướng",
-      price: 45000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-    {
-      id: 8,
-      category: "food",
-      name: "Gỏi Cuốn",
-      price: 35000,
-      image: "/placeholder.svg?height=100&width=100",
-    },
-  ];
-
   const todayStats = {
     totalSales: 2450000,
     ordersCount: 47,
@@ -127,11 +87,45 @@ const POS = () => {
     customersCount: 38,
   };
 
-  const filteredItems = menuItems.filter(
+  // Lấy sản phẩm từ API khi mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        // Đảm bảo lấy đúng mảng sản phẩm từ
+        const data = await ProductService.getProducts();
+        setMenuItems(data.data || []);
+      } catch (error) {
+        setMenuItems([]);
+      }
+      setIsLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
+  // Lọc sản phẩm theo danh mục và tìm kiếm
+  const filteredItems = menuItems?.filter(
     (item) =>
-      item.category === activeCategory &&
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      (activeCategory === "" || item.category === activeCategory) &&
+      item.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Lấy size từ API khi mở modal chi tiết
+  useEffect(() => {
+    if (showDetailModal) {
+      const fetchSizes = async () => {
+        try {
+          const data = await sizeService.getSizes();
+          setSelectedSize(data.data[0]);
+          setSizes(data.data || []);
+        } catch (error) {
+          setSizes([]);
+          setSelectedSize(null);
+        }
+      };
+      fetchSizes();
+    }
+  }, [showDetailModal]);
 
   const addToOrder = (item) => {
     const existingItem = currentOrder.find(
@@ -183,9 +177,9 @@ const POS = () => {
 
     // Simulate payment processing
     alert(
-      `Đơn hàng đã được xử lý!\nTổng: ${calculateTotal().toLocaleString(
-        "vi-VN"
-      )}₫\nPhương thức: ${
+      `Đơn hàng đã được xử lý!\nTổng: ${formatCurrency(
+        calculateTotal()
+      )}\nPhương thức: ${
         paymentMethod === "cash"
           ? "Tiền mặt"
           : paymentMethod === "card"
@@ -195,6 +189,49 @@ const POS = () => {
     );
     clearOrder();
   };
+
+  // Open detail modal when clicking a menu item
+  const handleShowDetail = (item) => {
+    setSelectedItem(item);
+    setShowDetailModal(true);
+    setSelectedSize(sizes[0]);
+    setQuantity(1);
+    setNotes("");
+  };
+
+  // Tính tổng giá
+  const calculateTotalPrice = () => {
+    console.log("Calculating total price for item:", selectedItem.price);
+    if (!selectedItem || !selectedSize) return 0;
+    return (selectedItem.price + (selectedSize.extraPrice || 0)) * quantity;
+  };
+
+  // Thêm vào đơn hàng với tuỳ chỉnh
+  const handleAddToOrder = () => {
+    if (!selectedItem || !selectedSize) return;
+    const orderItem = {
+      ...selectedItem,
+      size: selectedSize,
+      notes,
+      quantity,
+      price: selectedItem.price + (selectedSize.extraPrice || 0),
+    };
+    addToOrder(orderItem);
+    setShowDetailModal(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-amber-50">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <div className="text-lg text-amber-700 font-semibold">
+            Đang tải thực đơn...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-gradient-to-br from-amber-50 to-white flex flex-col">
@@ -285,7 +322,7 @@ const POS = () => {
             {filteredItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => addToOrder(item)}
+                onClick={() => handleShowDetail(item)}
                 className="bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-gray-100"
               >
                 <div className="w-full h-24 bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl mb-3 overflow-hidden">
@@ -299,13 +336,12 @@ const POS = () => {
                   {item.name}
                 </h3>
                 <div className="text-amber-700 font-bold">
-                  {item.price.toLocaleString("vi-VN")}₫
+                  {formatCurrency(item.price)}
                 </div>
               </button>
             ))}
           </div>
         </div>
-
         {/* Order Section */}
         <div className="w-96 bg-white shadow-2xl border-l border-gray-200 flex flex-col">
           {/* Order Header */}
@@ -339,6 +375,25 @@ const POS = () => {
                 </div>
               </div>
             </button>
+
+            {/* Chọn số bàn */}
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Số đơn / Số bàn
+              </label>
+              <select
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
+              >
+                <option value="">Chọn số bàn</option>
+                {[...Array(20)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    Bàn {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Order Items */}
@@ -517,6 +572,99 @@ const POS = () => {
                 className="w-full bg-amber-600 text-white py-3 rounded-2xl hover:bg-amber-700 transition-colors"
               >
                 Lưu Thông Tin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal for Customization */}
+      {showDetailModal && selectedItem && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 w-96 max-w-[90vw] relative">
+            <button
+              onClick={() => setShowDetailModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-xl"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col items-center">
+              <img
+                src={selectedItem.image || "/placeholder.svg"}
+                alt={selectedItem.name}
+                className="w-32 h-32 object-cover rounded-xl mb-4"
+              />
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                {selectedItem.name}
+              </h2>
+              <div className="text-amber-700 font-bold text-lg mb-4">
+                {formatCurrency(calculateTotalPrice())}
+              </div>
+
+              {/* Size Selection */}
+              <div className="w-full mb-4">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                  Chọn Kích Cỡ
+                </h3>
+                <div className="flex gap-2">
+                  {sizes?.map((size) => (
+                    <button
+                      key={size.id}
+                      onClick={() => setSelectedSize(size)}
+                      className={`flex-1 px-3 py-2 rounded-xl border-2 transition-all duration-300 text-sm font-medium ${
+                        selectedSize?.id === size.id
+                          ? "border-amber-500 bg-amber-50 text-amber-800"
+                          : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
+                      }`}
+                    >
+                      <div>{size.name}</div>
+                      {size.extraPrice > 0 && (
+                        <div className="text-xs text-amber-700 font-medium">
+                          +{formatCurrency(size.extraPrice)}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="w-full mb-4">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                  Ghi chú đặc biệt
+                </h3>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Thêm ghi chú cho món này..."
+                  className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none text-sm"
+                  rows={2}
+                  maxLength={100}
+                />
+              </div>
+
+              {/* Quantity */}
+              <div className="flex items-center gap-4 mb-4">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="text-lg font-bold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              <button
+                onClick={handleAddToOrder}
+                className="w-full mt-2 bg-amber-600 text-white py-3 rounded-2xl hover:bg-amber-700 transition-colors font-semibold"
+              >
+                Thêm vào đơn
               </button>
             </div>
           </div>

@@ -13,7 +13,6 @@ const paymentService = {
   payWithPayOS: async (data) => {
     try {
       const response = await instance.post("/PayOS/create-payment-url", data);
-      console.log("PayOS payment URL created successfully:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error processing payment with PayOS:", error.message);
