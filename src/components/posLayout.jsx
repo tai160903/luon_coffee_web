@@ -3,7 +3,7 @@ import POSSidebar from "./pos-sidebar";
 
 const POSLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex bg-gray-50 min-h-screen overflow-hidden">
       <POSSidebar />
       <main className="flex-1 p-6">
         <Outlet />

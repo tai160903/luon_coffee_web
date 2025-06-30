@@ -5,15 +5,8 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Coffee,
-  LayoutDashboard,
   ShoppingCart,
   ClipboardList,
-  UtensilsCrossed,
-  Users,
-  UserCheck,
-  Package,
-  BarChart3,
-  Settings,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -35,64 +28,12 @@ const POSSidebar = () => {
       icon: ShoppingCart,
       color: "from-green-500 to-green-600",
     },
-  ];
-
-  const managerMenuItems = [
-    {
-      path: "/manager",
-      name: "Tổng Quan",
-      nameEn: "Dashboard",
-      icon: LayoutDashboard,
-      color: "from-blue-500 to-blue-600",
-    },
     {
       path: "/pos/orders",
       name: "Đơn Hàng",
       nameEn: "Orders",
       icon: ClipboardList,
       color: "from-orange-500 to-orange-600",
-    },
-    {
-      path: "/manager/menu-management",
-      name: "Thực Đơn",
-      nameEn: "Menu",
-      icon: UtensilsCrossed,
-      color: "from-amber-500 to-amber-600",
-    },
-    {
-      path: "/manager/customers",
-      name: "Khách Hàng",
-      nameEn: "Customers",
-      icon: Users,
-      color: "from-purple-500 to-purple-600",
-    },
-    {
-      path: "/manager/staff",
-      name: "Nhân Viên",
-      nameEn: "Staff",
-      icon: UserCheck,
-      color: "from-indigo-500 to-indigo-600",
-    },
-    {
-      path: "/manager/inventory",
-      name: "Kho Hàng",
-      nameEn: "Inventory",
-      icon: Package,
-      color: "from-teal-500 to-teal-600",
-    },
-    {
-      path: "/manager/reports",
-      name: "Báo Cáo",
-      nameEn: "Reports",
-      icon: BarChart3,
-      color: "from-red-500 to-red-600",
-    },
-    {
-      path: "/manager/settings",
-      name: "Cài Đặt",
-      nameEn: "Settings",
-      icon: Settings,
-      color: "from-gray-500 to-gray-600",
     },
   ];
 
@@ -106,7 +47,7 @@ const POSSidebar = () => {
 
   return (
     <div
-      className={`bg-white shadow-2xl border-r border-gray-200 flex flex-col transition-all duration-300 ${
+      className={`bg-white shadow-2xl border-r border-gray-200 flex flex-col transition-all min-h-calc(100vh - 200px) duration-300 ${
         isCollapsed ? "w-20" : "w-80"
       }`}
     >
@@ -162,55 +103,8 @@ const POSSidebar = () => {
 
         {/* POS Section */}
         <div className="px-6 mb-8">
-          {!isCollapsed && (
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
-                Bán Hàng
-              </h3>
-              <div className="w-8 h-0.5 bg-green-500 rounded-full"></div>
-            </div>
-          )}
           <div className="space-y-2">
             {posMenuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-4 px-4 py-3 rounded-2xl font-medium transition-all duration-300 group ${
-                    isActive(item.path)
-                      ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isCollapsed && (
-                    <div className="flex-1">
-                      <div className="font-semibold">{item.name}</div>
-                      <div className="text-xs opacity-70">{item.nameEn}</div>
-                    </div>
-                  )}
-                  {isActive(item.path) && !isCollapsed && (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Manager Section */}
-        <div className="px-6">
-          {!isCollapsed && (
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
-                Quản Lý
-              </h3>
-              <div className="w-8 h-0.5 bg-blue-500 rounded-full"></div>
-            </div>
-          )}
-          <div className="space-y-2">
-            {managerMenuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
