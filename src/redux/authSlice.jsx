@@ -38,7 +38,7 @@ export const login = createAsyncThunk(
 
 // Logout action
 export const logout = createAsyncThunk("auth/logout", async () => {
-  localStorage.removeItem("user");
+  localStorage.clear();
 });
 
 // Initial state
@@ -58,6 +58,10 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isError = false;
       state.errorMessage = "";
+    },
+    updateUser: (state, action) => {
+      console.log("Updating user in authSlice:", action.payload);
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -87,5 +91,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { reset } = authSlice.actions;
+export const { reset, updateUser } = authSlice.actions;
 export default authSlice.reducer;

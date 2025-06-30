@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
   Smartphone,
@@ -18,6 +18,7 @@ import formatCurrency from "../utils/formatCurrency";
 import { toast } from "sonner";
 
 const Payment = () => {
+  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [customerInfo, setCustomerInfo] = useState({
     fullName: "",
@@ -74,7 +75,7 @@ const Payment = () => {
       id: "payos",
       name: "PayOS",
       description: "Thanh toán qua PayOS",
-      icon: CreditCard, // You can replace with PayOS SVG/icon if available
+      icon: CreditCard,
       color: "from-blue-500 to-blue-600",
     },
   ];
@@ -119,9 +120,17 @@ const Payment = () => {
       let response;
       if (paymentMethod === "wallet") {
         response = await paymentService.payWithWallet(payload);
+        if (response.status === 200) {
+          localStorage.removeItem("orderData");
+          localStorage.setItem("orderData", JSON.stringify(response.data.data));
+          navigate("/success");
+        }
       } else if (paymentMethod === "payos") {
         response = await paymentService.payWithPayOS(payload);
-        window.location.replace(response.paymentUrl);
+        if (response.status === 200) {
+          localStorage.removeItem("orderData");
+          window.location.replace(response.data.paymentUrl);
+        }
       }
 
       setIsProcessing(false);
@@ -359,7 +368,7 @@ const Payment = () => {
                       )}
                     </div>
                     <div className="font-medium text-gray-800 ml-4">
-                      {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                      {formatCurrency(item.unitPrice * item.quantity)}
                     </div>
                   </div>
                 ))}

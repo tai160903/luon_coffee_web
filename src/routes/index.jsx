@@ -21,6 +21,7 @@ import Orders from "../pages/pos/Orders";
 import Reports from "../pages/pos/Reports";
 import Sales from "../pages/pos/Sales";
 import POSLayout from "../components/posLayout";
+import SuccessPage from "../pages/Success";
 
 const router = createBrowserRouter([
   {
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/success",
+    element: <SuccessPage />,
   },
   // {
   //   path: "/manager",

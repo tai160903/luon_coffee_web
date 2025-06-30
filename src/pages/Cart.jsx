@@ -13,10 +13,13 @@ import {
   AlertCircle,
   ChevronRight,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
 import cartService from "../services/cart.service";
 import formatCurrency from "../utils/formatCurrency";
-
+import { removeFromCart, setCartInfo } from "../redux/cartSilce";
 const Cart = () => {
+  const dispatch = useDispatch();
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -67,7 +70,9 @@ const Cart = () => {
     setIsLoading(true);
     try {
       const response = await cartService.getCart();
-      setCartItems(response.data.cartItems || []);
+      const items = response.data.cartItems || [];
+      setCartItems(items);
+      dispatch(setCartInfo({ cartItems: items }));
     } catch (error) {
       console.error("Error fetching cart:", error);
     }
@@ -162,8 +167,15 @@ const Cart = () => {
     );
   };
 
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  const removeItem = async (id) => {
+    try {
+      await cartService.deleteCartItem(id);
+      setCartItems((items) => items.filter((item) => item.id !== id));
+      dispatch(removeFromCart(id));
+      toast.success("Xóa sản phẩm thành công!");
+    } catch (error) {
+      toast.error("Xóa sản phẩm thất bại. Vui lòng thử lại!");
+    }
   };
 
   const applyPromoCode = () => {

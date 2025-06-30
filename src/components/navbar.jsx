@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
@@ -33,22 +33,31 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [localUser, setLocalUser] = useState(null);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Lấy user từ localStorage để cập nhật ví khi reload
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setLocalUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Lấy user từ redux hoặc localStorage (ưu tiên redux nếu đã login)
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const walletBalance = user?.wallet ?? localUser?.wallet ?? 0;
+  console.log("User wallet balance:", walletBalance);
 
   // Get cart items from Redux
   const cartItems = useSelector((state) => state.cart.cartItems);
-  console.log("Cart items:", cartItems);
   const cartCount = cartItems?.length || 0;
-
-  const walletBalance = user?.wallet || 0;
 
   const getUserDisplayName = () => {
     if (user?.fullName) return user.fullName;
-    return "User";
+    return "Khách Hàng";
   };
 
   // Get user initials for avatar
@@ -59,7 +68,7 @@ const Navbar = () => {
     if (user?.email && user.email.length > 0) {
       return user.email.charAt(0).toUpperCase();
     }
-    return "U";
+    return "K";
   };
 
   // Handle scroll effect

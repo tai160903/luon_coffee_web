@@ -34,7 +34,6 @@ function Menu() {
     setIsLoading(false);
   };
 
-  console.log("Products:", products);
   const categories = [
     {
       id: "coffee",
@@ -347,7 +346,7 @@ function Menu() {
 
         {/* Items Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((item) => (
+          {products?.map((item) => (
             <Link
               to={`/details/${item.id}`}
               key={item.id}

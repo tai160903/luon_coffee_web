@@ -26,7 +26,6 @@ const cartService = {
   clearCart: async () => {
     try {
       const response = await instance.delete("/Cart/clear-cart");
-      console.log("Cart cleared successfully:", response.data);
 
       // Clear Redux cart as well
       store.dispatch(clearCart());
@@ -40,14 +39,9 @@ const cartService = {
 
   deleteCartItem: async (cartItemId) => {
     try {
-      const response = await instance.put(`/Cart/delete-cart-item`, {
-        cartItemId,
+      const response = await instance.delete(`/Cart/remove-cart-item`, {
+        data: { cartItemId },
       });
-      console.log("Cart item deleted successfully:", response.data);
-
-      // Note: Redux cart will need to be updated separately
-      // This is usually done in the component that calls this method
-
       return response.data;
     } catch (error) {
       console.error("Error deleting cart item:", error.message);
@@ -73,7 +67,6 @@ const cartService = {
         items: formattedItems,
       });
 
-      console.log("Local cart synced with server:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error syncing local cart with server:", error.message);
@@ -89,7 +82,6 @@ const cartService = {
         quantity: newQuantity,
       });
 
-      console.log("Cart item quantity updated:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating cart item quantity:", error.message);

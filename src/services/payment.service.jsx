@@ -4,7 +4,7 @@ const paymentService = {
   payWithWallet: async (data) => {
     try {
       const response = await instance.post("/Payment/payment-by-wallet", data);
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error processing payment with wallet:", error.message);
       return null;
@@ -13,7 +13,7 @@ const paymentService = {
   payWithPayOS: async (data) => {
     try {
       const response = await instance.post("/PayOS/create-payment-url", data);
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error processing payment with PayOS:", error.message);
       return null;

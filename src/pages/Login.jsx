@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Coffee, User, Lock, ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import cartService from "../services/cart.service";
 import { setCartInfo } from "../redux/cartSilce";
 
@@ -83,7 +83,7 @@ const Login = () => {
             } catch (err) {
               toast.error("Không thể tải giỏ hàng, vui lòng thử lại sau.");
             }
-            setTimeout(() => navigate("/menu"), 500);
+            setTimeout(() => navigate("/menu", { replace: true }), 500);
             return "Đăng nhập thành công!";
           } else {
             throw new Error("Đăng nhập thất bại");
@@ -102,20 +102,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50 flex items-center justify-center py-12 px-4">
-      {/* Sonner Toast Container */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          className: "rounded-lg shadow-md font-medium",
-          style: {
-            background: "white",
-            color: "#334155",
-            border: "1px solid #e2e8f0",
-          },
-          duration: 4000,
-        }}
-      />
-
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">

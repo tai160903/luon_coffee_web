@@ -148,16 +148,11 @@ const cartSlice = createSlice({
       );
 
       if (itemIndex >= 0) {
-        // Don't allow quantities less than 1
         state.cartItems[itemIndex].quantity = Math.max(1, quantity);
-
-        // Calculate totals
         const totals = calculateCartTotals(state.cartItems);
         state.totalQuantity = totals.quantity;
         state.totalAmount = totals.amount;
         state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-
-        // Save to localStorage
         saveCartToStorage(state.cartItems);
       }
     },

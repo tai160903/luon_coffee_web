@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../redux/cartSilce";
+import { setCartInfo } from "../redux/cartSilce";
 import { toast } from "sonner";
 import ProductService from "../services/product.service";
 import sizeService from "../services/size.service";
@@ -77,24 +77,20 @@ const Detail = () => {
     }
   };
 
-  // Calculate total price
   const calculateTotalPrice = () => {
     if (!product) return 0;
     const sizePrice = selectedSize?.extraPrice || 0;
     return (product.price + sizePrice) * quantity;
   };
 
-  // Handle quantity changes
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
-  // Handle add to cart
   const handleAddToCart = async () => {
     if (!product || !selectedSize) {
       toast.error("Vui lòng chọn đầy đủ thông tin sản phẩm");
       return;
     }
-    console.log("Assa");
     setAddingToCart(true);
 
     try {
@@ -107,25 +103,20 @@ const Detail = () => {
       };
 
       if (isAuthenticated) {
-        console.log("Adding to cart with customization:", customize);
-
         const response = await cartService.addToCart(customize);
-        console.log("Add to cart response:", response.data.cartItems);
         if (response && response.data) {
-          dispatch(addToCart(response.data.cartItems));
+          dispatch(setCartInfo({ cartItems: response.data.cartItems }));
         }
       }
 
       toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
     } catch (error) {
-      console.error("Error adding to cart:", error);
       toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
     } finally {
       setAddingToCart(false);
     }
   };
 
-  // Toggle favorite status
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
 
