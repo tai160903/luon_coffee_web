@@ -1,41 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Eye,
-  EyeOff,
-  Coffee,
-  Mail,
-  Lock,
-  User,
-  Phone,
-  ArrowRight,
-  Facebook,
-  Chrome,
-} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Coffee, Facebook, Chrome } from "lucide-react";
+import authService from "../services/auth.service";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
-    agreeToTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -47,38 +35,23 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Vui lòng nhập họ tên";
-    } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = "Họ tên phải có ít nhất 2 ký tự";
+    if (!formData.username.trim()) {
+      newErrors.username = "Vui lòng nhập tên đăng nhập";
     }
-
-    if (!formData.email) {
+    if (!formData.email.trim()) {
       newErrors.email = "Vui lòng nhập email";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email không hợp lệ";
     }
-
-    if (!formData.phone) {
-      newErrors.phone = "Vui lòng nhập số điện thoại";
-    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Số điện thoại không hợp lệ";
-    }
-
     if (!formData.password) {
       newErrors.password = "Vui lòng nhập mật khẩu";
     } else if (formData.password.length < 6) {
       newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
     }
-
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Vui lòng xác nhận mật khẩu";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
-    }
-
-    if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = "Vui lòng đồng ý với điều khoản sử dụng";
     }
 
     setErrors(newErrors);
@@ -90,12 +63,18 @@ const Register = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Register attempt:", formData);
-      setIsLoading(false);
-      // In real app, handle register success/error
-    }, 2000);
+    try {
+      await authService.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
+      alert("Đăng ký thành công!");
+      navigate("/login"); // Chuyển hướng sang trang đăng nhập sau khi đăng ký thành công
+    } catch (error) {
+      setErrors({ username: "Đăng ký thất bại. Vui lòng thử lại." });
+    }
+    setIsLoading(false);
   };
 
   const handleSocialRegister = (provider) => {
@@ -133,32 +112,29 @@ const Register = () => {
         {/* Register Form */}
         <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full Name Field */}
+            {/* Username Field */}
             <div>
               <label
-                htmlFor="fullName"
+                htmlFor="username"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Họ và Tên
+                Tên đăng nhập
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-4 pl-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
-                    errors.fullName
-                      ? "border-red-300 focus:border-red-500 bg-red-50"
-                      : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
-                  }`}
-                  placeholder="Nhập họ và tên của bạn"
-                />
-                <User className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-              </div>
-              {errors.fullName && (
-                <p className="mt-2 text-sm text-red-600">{errors.fullName}</p>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-4 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
+                  errors.username
+                    ? "border-red-300 focus:border-red-500 bg-red-50"
+                    : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
+                }`}
+                placeholder="Nhập tên đăng nhập"
+              />
+              {errors.username && (
+                <p className="mt-2 text-sm text-red-600">{errors.username}</p>
               )}
             </div>
 
@@ -168,55 +144,23 @@ const Register = () => {
                 htmlFor="email"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Email
+                Địa chỉ email
               </label>
-              <div className="relative">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-4 pl-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
-                    errors.email
-                      ? "border-red-300 focus:border-red-500 bg-red-50"
-                      : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
-                  }`}
-                  placeholder="Nhập địa chỉ email của bạn"
-                />
-                <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-              </div>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`w-full px-4 py-4 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
+                  errors.email
+                    ? "border-red-300 focus:border-red-500 bg-red-50"
+                    : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
+                }`}
+                placeholder="Nhập địa chỉ email"
+              />
               {errors.email && (
                 <p className="mt-2 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Phone Field */}
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                Số Điện Thoại
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-4 pl-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
-                    errors.phone
-                      ? "border-red-300 focus:border-red-500 bg-red-50"
-                      : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
-                  }`}
-                  placeholder="Nhập số điện thoại của bạn"
-                />
-                <Phone className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-              </div>
-              {errors.phone && (
-                <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
               )}
             </div>
 
@@ -226,7 +170,7 @@ const Register = () => {
                 htmlFor="password"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Mật Khẩu
+                Mật khẩu
               </label>
               <div className="relative">
                 <input
@@ -235,14 +179,13 @@ const Register = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-4 pl-12 pr-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
+                  className={`w-full px-4 py-4 pr-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
                     errors.password
                       ? "border-red-300 focus:border-red-500 bg-red-50"
                       : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
                   }`}
-                  placeholder="Tạo mật khẩu mạnh"
+                  placeholder="Nhập mật khẩu"
                 />
-                <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -266,7 +209,7 @@ const Register = () => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Xác Nhận Mật Khẩu
+                Xác nhận mật khẩu
               </label>
               <div className="relative">
                 <input
@@ -275,14 +218,13 @@ const Register = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-4 pl-12 pr-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
+                  className={`w-full px-4 py-4 pr-12 rounded-2xl border-2 transition-all duration-300 focus:outline-none ${
                     errors.confirmPassword
                       ? "border-red-300 focus:border-red-500 bg-red-50"
                       : "border-gray-200 focus:border-amber-500 focus:bg-amber-50/50"
                   }`}
                   placeholder="Nhập lại mật khẩu"
                 />
-                <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -302,41 +244,6 @@ const Register = () => {
               )}
             </div>
 
-            {/* Terms Agreement */}
-            <div>
-              <label className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  name="agreeToTerms"
-                  checked={formData.agreeToTerms}
-                  onChange={handleInputChange}
-                  className="w-5 h-5 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500 focus:ring-2 mt-0.5"
-                />
-                <span className="text-sm text-gray-600 leading-relaxed">
-                  Tôi đồng ý với{" "}
-                  <Link
-                    to="/terms"
-                    className="text-amber-600 hover:text-amber-700 font-medium"
-                  >
-                    Điều khoản sử dụng
-                  </Link>{" "}
-                  và{" "}
-                  <Link
-                    to="/privacy"
-                    className="text-amber-600 hover:text-amber-700 font-medium"
-                  >
-                    Chính sách bảo mật
-                  </Link>{" "}
-                  của Cà Phê Việt
-                </span>
-              </label>
-              {errors.agreeToTerms && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.agreeToTerms}
-                </p>
-              )}
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -346,10 +253,7 @@ const Register = () => {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
               ) : (
-                <>
-                  Tạo Tài Khoản
-                  <ArrowRight className="w-5 h-5" />
-                </>
+                <>Đăng Ký</>
               )}
             </button>
           </form>
@@ -385,16 +289,33 @@ const Register = () => {
             </button>
           </div>
 
-          {/* Login Link */}
-          <div className="mt-8 text-center">
-            <p className="text-gray-600">
-              Đã có tài khoản?{" "}
+          {/* Footer */}
+          <div className="mt-8 text-center text-sm text-gray-500">
+            <p>
+              Bạn đã có tài khoản?{" "}
               <Link
                 to="/login"
                 className="text-amber-600 hover:text-amber-700 font-semibold"
               >
                 Đăng nhập ngay
               </Link>
+            </p>
+            <p className="mt-4">
+              Bằng việc đăng ký, bạn đồng ý với chúng tôi về{" "}
+              <Link
+                to="/terms"
+                className="text-amber-600 hover:text-amber-700 font-semibold"
+              >
+                Điều khoản dịch vụ
+              </Link>{" "}
+              và{" "}
+              <Link
+                to="/privacy"
+                className="text-amber-600 hover:text-amber-700 font-semibold"
+              >
+                Chính sách bảo mật
+              </Link>
+              .
             </p>
           </div>
         </div>

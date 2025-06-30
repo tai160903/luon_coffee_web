@@ -10,12 +10,12 @@ import Payment from "../pages/Payment";
 import Contact from "../pages/Contact";
 import Profile from "../pages/profile";
 import About from "../pages/About";
-// import ManagerLayout from "../components/managerLayout";
-// import Dashboard from "../pages/manager/Dashboard";
-// import Product from "../pages/manager/Product";
-// import Staff from "../pages/manager/Staff";
-// import Inventory from "../pages/manager/Inventory";
-// import MenuManagement from "../pages/manager/MenuManager";
+import ManagerLayout from "../components/managerLayout";
+import Dashboard from "../pages/manager/Dashboard";
+import Product from "../pages/manager/Product";
+import Staff from "../pages/manager/Staff";
+import Inventory from "../pages/manager/Inventory";
+import MenuManagement from "../pages/manager/MenuManager";
 import DashboardPOS from "../pages/pos/DashboardPOS";
 import Orders from "../pages/pos/Orders";
 import Reports from "../pages/pos/Reports";
@@ -90,35 +90,35 @@ const router = createBrowserRouter([
     element: <SuccessPage />,
   },
   {
-    path: "/payment-failed",
+    path: "/payment-cancel",
     element: <FailedPage />,
   },
-  // {
-  //   path: "/manager",
-  //   element: <ManagerLayout />,
-  //   children: [
-  //     {
-  //       path: "",
-  //       element: <Dashboard />,
-  //     },
-  //     {
-  //       path: "products",
-  //       element: <Product />,
-  //     },
-  //     {
-  //       path: "inventory",
-  //       element: <Inventory />,
-  //     },
-  //     {
-  //       path: "menu-management",
-  //       element: <MenuManagement />,
-  //     },
-  //     {
-  //       path: "staffs",
-  //       element: <Staff />,
-  //     },
-  //   ],
-  // },
+  {
+    path: "/manager",
+    element: <ManagerLayout />,
+    children: [
+      {
+        path: "",
+        element: <Dashboard />,
+      },
+      {
+        path: "products",
+        element: <Product />,
+      },
+      {
+        path: "inventory",
+        element: <Inventory />,
+      },
+      {
+        path: "menu-management",
+        element: <MenuManagement />,
+      },
+      {
+        path: "staffs",
+        element: <Staff />,
+      },
+    ],
+  },
   {
     path: "/pos",
     element: <POSLayout />,

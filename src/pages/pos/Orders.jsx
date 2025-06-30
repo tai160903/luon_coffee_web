@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Eye,
@@ -12,19 +12,23 @@ import {
   Phone,
   RefreshCw,
 } from "lucide-react";
+import orderService from "../../services/order.service";
 
 const Orders = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const statusOptions = [
     { id: "all", name: "Tất Cả", color: "bg-gray-100 text-gray-800" },
+    { id: "pending", name: "Mới", color: "bg-yellow-100 text-yellow-800" },
     {
-      id: "pending",
-      name: "Chờ Xử Lý",
-      color: "bg-yellow-100 text-yellow-800",
+      id: "confirmed",
+      name: "Đã Xác Nhận",
+      color: "bg-blue-100 text-blue-800",
     },
     {
       id: "preparing",
@@ -40,116 +44,72 @@ const Orders = () => {
     { id: "cancelled", name: "Đã Hủy", color: "bg-red-100 text-red-800" },
   ];
 
-  const orders = [
-    {
-      id: "VN2024001",
-      orderNumber: "001",
-      customer: {
-        name: "Nguyễn Văn An",
-        phone: "0901234567",
-        email: "nguyenvanan@email.com",
-      },
-      items: [
-        {
-          name: "Cà Phê Phin Truyền Thống",
-          quantity: 2,
-          price: 25000,
-          notes: "Ít đường",
+  const statusMap = {
+    0: "new", // NEW
+    1: "confirmed", // CONFIRMED
+    2: "preparing", // PREPARING
+    3: "readyforpickup", // READYFORPICKUP
+    4: "completed", // COMPLETED
+    5: "cancelled", // CANCELLED
+  };
+
+  // Định nghĩa reverseStatusMap để lấy số từ status chữ
+  const reverseStatusMap = {
+    new: 0,
+    confirmed: 1,
+    preparing: 2,
+    ready: 3,
+    completed: 4,
+    cancelled: 5,
+  };
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setIsLoading(true);
+      const data = await orderService.getAllOrders();
+      const mapped = (data.data || []).map((order) => ({
+        id: order.id,
+        orderNumber: order.code || order.id,
+        customer: {
+          name: order.customerName || order.fullName || "",
+          phone: order.phoneNumber || "",
+          email: order.email || "",
         },
-        {
-          name: "Bánh Mì Thịt Nướng",
-          quantity: 1,
-          price: 45000,
-          notes: "Không rau mùi",
-        },
-      ],
-      total: 95000,
-      status: "preparing",
-      orderTime: "2024-01-15T14:30:00",
-      estimatedTime: "2024-01-15T14:45:00",
-      paymentMethod: "cash",
-      notes: "Gọi điện khi sẵn sàng",
-    },
-    {
-      id: "VN2024002",
-      orderNumber: "002",
-      customer: {
-        name: "Trần Thị Bình",
-        phone: "0912345678",
-        email: "tranthib@email.com",
-      },
-      items: [
-        { name: "Cà Phê Trứng", quantity: 1, price: 35000, notes: "" },
-        { name: "Cà Phê Đá", quantity: 2, price: 28000, notes: "Nhiều đá" },
-      ],
-      total: 91000,
-      status: "ready",
-      orderTime: "2024-01-15T14:25:00",
-      estimatedTime: "2024-01-15T14:40:00",
-      paymentMethod: "card",
-      notes: "",
-    },
-    {
-      id: "VN2024003",
-      orderNumber: "003",
-      customer: {
-        name: "Lê Văn Cường",
-        phone: "0923456789",
-        email: "levancuong@email.com",
-      },
-      items: [
-        { name: "Cà Phê Dừa", quantity: 1, price: 32000, notes: "" },
-        { name: "Gỏi Cuốn", quantity: 2, price: 35000, notes: "Thêm tương" },
-      ],
-      total: 102000,
-      status: "pending",
-      orderTime: "2024-01-15T14:35:00",
-      estimatedTime: "2024-01-15T14:50:00",
-      paymentMethod: "ewallet",
-      notes: "Khách đợi tại quán",
-    },
-    {
-      id: "VN2024004",
-      orderNumber: "004",
-      customer: {
-        name: "Phạm Thị Dung",
-        phone: "0934567890",
-        email: "phamthidung@email.com",
-      },
-      items: [
-        {
-          name: "Cà Phê Phin Truyền Thống",
-          quantity: 1,
-          price: 25000,
+        items: (order.orderItems || []).map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.unitPrice,
           notes: "",
-        },
-      ],
-      total: 25000,
-      status: "completed",
-      orderTime: "2024-01-15T14:15:00",
-      estimatedTime: "2024-01-15T14:30:00",
-      paymentMethod: "cash",
-      notes: "",
-    },
-  ];
+        })),
+        total: order.finalPrice || order.totalAmount || 0,
+        status: statusMap[order.status], // <-- map số sang chuỗi
+        orderTime: order.createAt,
+        estimatedTime: "",
+        paymentMethod: order.payment || "",
+        notes: "",
+      }));
+      setOrders(mapped);
+      setIsLoading(false);
+    };
+    fetchOrders();
+  }, []);
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
       selectedStatus === "all" || order.status === selectedStatus;
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = order.id;
+    order.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.customer.phone.includes(searchQuery);
     return matchesStatus && matchesSearch;
   });
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "pending":
+      case "new":
         return <Clock className="w-4 h-4" />;
       case "preparing":
         return <RefreshCw className="w-4 h-4" />;
-      case "ready":
+      case "readyforpickups":
         return <CheckCircle className="w-4 h-4" />;
       case "completed":
         return <CheckCircle className="w-4 h-4" />;
@@ -165,9 +125,92 @@ const Orders = () => {
     return statusOption ? statusOption.color : "bg-gray-100 text-gray-800";
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    // In real app, this would update the database
-    console.log(`Updating order ${orderId} to status ${newStatus}`);
+  const updateOrderStatus = async (orderId, statusString) => {
+    try {
+      setIsLoading(true);
+      // Nếu truyền vào là chữ, lấy số tương ứng
+      const statusNumber =
+        typeof statusString === "string"
+          ? reverseStatusMap[statusString]
+          : statusString;
+      const res = await orderService.updateStatus(orderId, statusNumber);
+      if (res) {
+        const data = await orderService.getAllOrders();
+        const mapped = (data.data || []).map((order) => ({
+          id: order.id,
+          orderNumber: order.code || order.id,
+          customer: {
+            name: order.customerName || order.fullName || "",
+            phone: order.phoneNumber || "",
+            email: order.email || "",
+          },
+          items: (order.orderItems || []).map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice,
+            notes: "",
+          })),
+          total: order.finalPrice || order.totalAmount || 0,
+          status: order.status,
+          orderTime: order.createAt,
+          estimatedTime: "",
+          paymentMethod: order.payment || "",
+          notes: "",
+        }));
+        setOrders(mapped);
+      }
+    } catch (error) {
+      alert("Cập nhật trạng thái đơn hàng thất bại!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Hàm cập nhật trạng thái tiếp theo
+  const updateOrderToNextStatus = async (order) => {
+    try {
+      console.log("Updating order to next status:", order);
+      setIsLoading(true);
+      const currentStatusNum = reverseStatusMap[order.status];
+      console.log("Current status number:", currentStatusNum);
+      if (currentStatusNum >= 4) {
+        setIsLoading(false);
+        return;
+      }
+      const nextStatusNum = currentStatusNum + 1;
+      console.log("Updating order to next status:", order.id, nextStatusNum);
+      const res = await orderService.updateStatus(order.id, nextStatusNum);
+      if (res) {
+        // Reload lại danh sách đơn hàng
+        const data = await orderService.getAllOrders();
+        const mapped = (data.data || []).map((order) => ({
+          id: order.code || order.id,
+          orderNumber: order.code || order.id,
+          customer: {
+            name: order.customerName || order.fullName || "",
+            phone: order.phoneNumber || "",
+            email: order.email || "",
+          },
+          items: (order.orderItems || []).map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice,
+            notes: "",
+          })),
+          total: order.finalPrice || order.totalAmount || 0,
+          status: statusMap[order.status],
+          orderTime: order.createAt,
+          estimatedTime: "",
+          paymentMethod: order.payment || "",
+          notes: "",
+        }));
+        setOrders(mapped);
+      }
+    } catch (error) {
+      alert("Cập nhật trạng thái đơn hàng thất bại!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatTime = (timeString) => {
@@ -187,6 +230,36 @@ const Orders = () => {
 
   return (
     <div className="p-6 bg-gradient-to-br from-amber-50 to-white min-h-screen">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-white/60 flex items-center justify-center z-50">
+          <div className="flex flex-col items-center">
+            <svg
+              className="animate-spin h-10 w-10 text-amber-500 mb-4"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+            <div className="text-amber-700 font-semibold text-lg">
+              Đang tải đơn hàng...
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -350,7 +423,7 @@ const Orders = () => {
 
               {order.status === "pending" && (
                 <button
-                  onClick={() => updateOrderStatus(order.id, "preparing")}
+                  onClick={() => updateOrderStatus(order.id, "preparing")} // PREPARING = 2
                   className="flex-1 bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition-colors"
                 >
                   Bắt Đầu
@@ -359,7 +432,7 @@ const Orders = () => {
 
               {order.status === "preparing" && (
                 <button
-                  onClick={() => updateOrderStatus(order.id, "ready")}
+                  onClick={() => updateOrderStatus(order.id, "ready")} // READYFORPICKUP = 3
                   className="flex-1 bg-green-600 text-white py-2 rounded-xl hover:bg-green-700 transition-colors"
                 >
                   Hoàn Thành
@@ -368,12 +441,29 @@ const Orders = () => {
 
               {order.status === "ready" && (
                 <button
-                  onClick={() => updateOrderStatus(order.id, "completed")}
+                  onClick={() => updateOrderStatus(order.id, "completed")} // COMPLETED = 4
                   className="flex-1 bg-emerald-600 text-white py-2 rounded-xl hover:bg-emerald-700 transition-colors"
                 >
                   Đã Lấy
                 </button>
               )}
+
+              {/* Nút cập nhật trạng thái hoàn thành cho mọi trạng thái khác chưa hoàn thành */}
+              {order.status !== "completed" && order.status !== "cancelled" && (
+                <button
+                  onClick={() => updateOrderStatus(order.id, "completed")}
+                  className="flex-1 bg-emerald-500 text-white py-2 rounded-xl hover:bg-emerald-600 transition-colors"
+                >
+                  Cập nhật Hoàn Thành
+                </button>
+              )}
+
+              <button
+                onClick={() => updateOrderToNextStatus(order)}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition-colors"
+              >
+                Cập nhật trạng thái tiếp theo
+              </button>
             </div>
           </div>
         ))}

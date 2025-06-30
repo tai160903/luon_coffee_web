@@ -43,7 +43,6 @@ export default function SuccessPage() {
     } else {
       const params = new URLSearchParams(location.search);
       const orderCode = params.get("orderCode");
-      console.log("Order code from URL:", orderCode);
       if (orderCode) {
         (async () => {
           try {

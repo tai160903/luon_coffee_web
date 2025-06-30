@@ -46,7 +46,7 @@ const POSSidebar = () => {
       color: "from-blue-500 to-blue-600",
     },
     {
-      path: "/manager/orders",
+      path: "/pos/orders",
       name: "Đơn Hàng",
       nameEn: "Orders",
       icon: ClipboardList,
