@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   Coffee,
-  Leaf,
   Star,
   ArrowRight,
   CheckCircle,
@@ -38,14 +37,15 @@ function Home() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              VIỆT COFFEE
+              LƯỢN CAFE
             </h1>
 
             <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Ghé thăm quán cà phê ấm cúng của chúng tôi để thưởng thức cà phê
-              Việt Nam chính hiệu hoặc đặt trước để lấy theo giờ thuận tiện.
-              Trải nghiệm hương vị đậm đà và truyền thống được pha chế tươi mỗi
-              ngày.
+              Ghé thăm quán cà phê thoáng mát, nơi bạn có thể thưởng thức những
+              tách cà phê Việt Nam chính hiệu được pha chế thủ công từ hạt cà
+              phê tươi ngon nhất. Từ cà phê phin truyền thống đến tôi, cà phê
+              Việt Nam cơ bản, cà phê Việt Nam truyền thống, cà phê Việt Nam pha
+              truyền thống.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
@@ -211,18 +211,13 @@ function Home() {
               </div>
             </div>
             <div className="lg:w-1/2">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <Leaf className="w-4 h-4" />
-                Di Sản Của Chúng Tôi
-              </div>
               <h2 className="text-4xl font-bold text-white mb-6">
                 Bắt Nguồn Từ Truyền Thống Việt Nam
               </h2>
               <p className="text-xl text-amber-100 mb-6 leading-relaxed">
-                Từ năm 1975, gia đình chúng tôi đã trồng cà phê tại Tây Nguyên
-                Việt Nam, nơi có khí hậu độc đáo và đất núi lửa màu mỡ tạo điều
-                kiện hoàn hảo để trồng những hạt cà phê mạnh mẽ, đậm đà hương
-                vị.
+                Những hạt cà phê Việt Nam được trồng tại Tây N guyên Việt Nam,
+                nơi có khí hậu độc đáo và đất núi lửa màu mỡ tạo điều kiện hoàn
+                hảo để trồng những hạt cà phê mạnh mẽ, đậm đà hương vị.
               </p>
               <p className="text-lg text-amber-200 mb-8 leading-relaxed">
                 Chúng tôi tôn vinh phương pháp pha cà phê truyền thống Việt Nam
@@ -239,97 +234,6 @@ function Home() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Star className="w-4 h-4" />
-              Tình Yêu Khách Hàng
-            </div>
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Những Người Yêu Cà Phê Nói Gì
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Tham gia cùng hàng nghìn khách hàng hài lòng đã khám phá hương vị
-              chính hiệu của cà phê Việt Nam
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100"
-              >
-                <div className="flex mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-amber-400 fill-current"
-                    />
-                  ))}
-                </div>
-                <p className="text-gray-700 italic mb-8 text-lg leading-relaxed">
-                  {testimonial.quote}
-                </p>
-                <div className="flex items-center">
-                  <div className="w-14 h-14 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-amber-800 font-bold text-lg">
-                      {testimonial.name.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-lg">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-gray-500">{testimonial.location}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-20 bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-200 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Coffee className="w-4 h-4" />
-              Kết Nối Với Chúng Tôi
-            </div>
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Tham Gia Cộng Đồng Cà Phê
-            </h2>
-            <p className="text-xl text-amber-100 mb-10 leading-relaxed">
-              Đăng ký để nhận cập nhật về quán, thức uống mới và ưu đãi đặc
-              biệt. Giảm 10% cho lần ghé thăm tiếp theo!
-            </p>
-            <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto mb-6">
-              <input
-                type="email"
-                placeholder="Nhập địa chỉ email của bạn"
-                className="flex-grow px-6 py-4 rounded-full border-0 focus:outline-none focus:ring-4 focus:ring-white/20 text-gray-800 placeholder-gray-500"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-white text-amber-800 font-bold py-4 px-8 rounded-full hover:bg-amber-50 transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
-              >
-                Giảm 10%
-              </button>
-            </form>
-            <p className="text-amber-200 text-sm">
-              Bằng cách đăng ký, bạn đồng ý với Chính sách Bảo mật của chúng
-              tôi. Chúng tôi tôn trọng quyền riêng tư và sẽ không bao giờ chia
-              sẻ thông tin của bạn.
-            </p>
           </div>
         </div>
       </section>
@@ -353,9 +257,9 @@ const features = [
   },
   {
     icon: MapPin,
-    title: "Không Gian Ấm Cúng",
+    title: "Không Gian Thoáng Mát",
     description:
-      "Ghé thăm không gian thân thiện để thưởng thức cà phê trong bầu không khí quán cà phê Việt Nam truyền thống.",
+      "Ghé thăm không gian thoáng mát, sử dụng cà phê Việt Nam tại nhà. Giải pháp sử dụng cà phê Việt Nam tại nhà hóa sử dụng cà phê Việt Nam tại nhà.",
   },
   {
     icon: Heart,
@@ -390,28 +294,6 @@ const featuredProducts = [
     name: "Cà Phê Trứng Việt Nam",
     price: 35000,
     sale: false,
-  },
-];
-
-// Sample testimonials
-const testimonials = [
-  {
-    name: "Nguyễn Thị Hoa",
-    location: "Hà Nội, Việt Nam",
-    quote:
-      "Cà phê Tây Nguyên đã trở thành nghi lễ buổi sáng của tôi. Hương vị cực kỳ đậm đà và chính hiệu. Nó nhắc tôi nhớ về chuyến du lịch Việt Nam và mang lại những kỷ niệm tuyệt vời mỗi ngày!",
-  },
-  {
-    name: "Trần Văn Minh",
-    location: "TP. Hồ Chí Minh, Việt Nam",
-    quote:
-      "Là người đã sống ở Việt Nam nhiều năm, cà phê này mang lại rất nhiều kỷ niệm. Phương pháp pha truyền thống tạo nên sự khác biệt hoàn toàn. Giống như có một mảnh Việt Nam tại nhà.",
-  },
-  {
-    name: "Lê Thị Mai",
-    location: "Đà Nẵng, Việt Nam",
-    quote:
-      "Bộ sưu tập cà phê Việt Nam là sự giới thiệu hoàn hảo về văn hóa cà phê Việt Nam. Giờ tôi hoàn toàn bị cuốn hút và đã đặt hàng nhiều lần. Chất lượng luôn tuyệt vời!",
   },
 ];
 

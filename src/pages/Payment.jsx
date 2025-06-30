@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import paymentService from "../services/payment.service"; // Change from orderService to paymentService
 import formatCurrency from "../utils/formatCurrency";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -123,7 +124,7 @@ const Payment = () => {
         if (response.status === 200) {
           localStorage.removeItem("orderData");
           localStorage.setItem("orderData", JSON.stringify(response.data.data));
-          navigate("/success");
+          navigate("/payment-success");
         }
       } else if (paymentMethod === "payos") {
         response = await paymentService.payWithPayOS(payload);
@@ -135,21 +136,22 @@ const Payment = () => {
 
       setIsProcessing(false);
 
-      if (response && response.success) {
+      if (response && response.status === 200) {
         toast.success("Thanh toán thành công. Cảm ơn bạn đã mua hàng!", {
-          duration: 5000,
+          theme: "colored",
+          autoClose: 5000,
         });
       } else {
         toast.error(
           response?.detail || "Đặt hàng thất bại. Vui lòng thử lại sau.",
-          { duration: 5000 }
+          { theme: "colored", autoClose: 5000 }
         );
       }
     } catch (error) {
       setIsProcessing(false);
       toast.error(
         "Đặt hàng thất bại. Vui lòng kiểm tra lại thông tin và thử lại.",
-        { duration: 5000 }
+        { theme: "colored", autoClose: 5000 }
       );
     }
   };

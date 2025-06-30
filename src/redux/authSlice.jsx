@@ -36,12 +36,11 @@ export const login = createAsyncThunk(
   }
 );
 
-// Logout action
-export const logout = createAsyncThunk("auth/logout", async () => {
+export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   localStorage.clear();
+  thunkAPI.dispatch({ type: "cart/clearCart" });
 });
 
-// Initial state
 const initialState = {
   user: user ? user : null,
   isAuthenticated: !!user,

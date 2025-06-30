@@ -80,8 +80,7 @@ export function CafeExperienceSection() {
               <div className="bg-amber-50 p-6 rounded-xl border border-amber-100">
                 <h4 className="font-bold text-amber-800 mb-2">Giờ Mở Cửa</h4>
                 <div className="text-amber-700 space-y-1">
-                  <p>Thứ Hai - Thứ Sáu: 7:00 - 19:00</p>
-                  <p>Thứ Bảy - Chủ Nhật: 8:00 - 20:00</p>
+                  <p>Thứ Hai - Chủ Nhật: 7:00 - 12:00 | 17:00 - 22:00</p>
                 </div>
               </div>
             </div>

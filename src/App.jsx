@@ -1,12 +1,12 @@
 import { RouterProvider } from "react-router-dom";
 import router from "./routes";
-import { Toaster } from "sonner";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   return (
     <>
       <RouterProvider router={router} />;
-      <Toaster />
+      <ToastContainer position="top-right" autoClose={2000} />
     </>
   );
 }

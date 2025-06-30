@@ -31,7 +31,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [localUser, setLocalUser] = useState(null);
   const location = useLocation();
@@ -98,7 +97,6 @@ const Navbar = () => {
     { path: "/", name: "Trang Chủ", nameEn: "Home", icon: Home },
     { path: "/menu", name: "Thực Đơn", nameEn: "Menu", icon: UtensilsCrossed },
     { path: "/about", name: "Về Chúng Tôi", nameEn: "About", icon: Info },
-    { path: "/location", name: "Địa Chỉ", nameEn: "Location", icon: MapPin },
     { path: "/contact", name: "Liên Hệ", nameEn: "Contact", icon: Mail },
   ];
 
@@ -121,28 +119,27 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Top Bar */}
       <div className="bg-gradient-to-r from-amber-800 to-amber-900 text-white py-2 px-4 text-sm">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Thứ 2-6: 7:00-19:00 | Thứ 7-CN: 8:00-20:00</span>
+              <span>Mở cửa: 7:00 - 12:00 | 17:00 - 22:00</span>
             </div>
             <div className="hidden md:flex items-center gap-2">
               <Phone className="w-4 h-4" />
-              <span>0123 456 789</span>
+              <span>0927 363 868</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            <span className="hidden sm:inline">123 Nguyễn Huệ, Q1, TP.HCM</span>
-            <span className="sm:hidden">Q1, TP.HCM</span>
+            <span className="hidden sm:inline">
+              22 Khổng Tử, Bình Thọ, Thủ Đức, Hồ Chí Minh, Việt Nam
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main Navbar */}
       <nav
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled
@@ -152,17 +149,13 @@ const Navbar = () => {
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <div className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Coffee className="w-6 h-6 text-white" />
               </div>
               <div className="hidden sm:block">
-                <div className="text-xl font-bold text-gray-800 group-hover:text-amber-700 transition-colors">
-                  Cà Phê Việt
-                </div>
-                <div className="text-xs text-gray-600">
-                  Authentic Vietnamese Coffee
+                <div className="text-xl font-bold text-gray-800 group-hover:text-amber-700 transition-colors ">
+                  Lượn cafe
                 </div>
               </div>
             </Link>
@@ -190,39 +183,6 @@ const Navbar = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="relative hidden md:block">
-                {showSearch ? (
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Tìm kiếm..."
-                      className="w-64 px-4 py-2 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      autoFocus
-                    />
-                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                    <button
-                      onClick={() => {
-                        setShowSearch(false);
-                        setSearchQuery("");
-                      }}
-                      className="ml-2 p-2 text-gray-500 hover:text-gray-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowSearch(true)}
-                    className="p-3 text-gray-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all duration-300"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-
               {/* Wallet - Only show if authenticated */}
               {isAuthenticated && (
                 <div
@@ -234,16 +194,6 @@ const Navbar = () => {
                     {formatCurrency(walletBalance)}
                   </span>
                 </div>
-              )}
-
-              {/* Favorites - Only show if authenticated */}
-              {isAuthenticated && (
-                <Link
-                  to="/favorites"
-                  className="p-3 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-300 relative"
-                >
-                  <Heart className="w-5 h-5" />
-                </Link>
               )}
 
               {/* Cart */}
@@ -312,7 +262,7 @@ const Navbar = () => {
                         </Link>
 
                         <Link
-                          to="/orders"
+                          to="/orders-history"
                           onClick={() => setShowUserMenu(false)}
                           className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-amber-50 hover:text-amber-700"
                         >

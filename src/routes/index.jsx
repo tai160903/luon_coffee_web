@@ -22,6 +22,8 @@ import Reports from "../pages/pos/Reports";
 import Sales from "../pages/pos/Sales";
 import POSLayout from "../components/posLayout";
 import SuccessPage from "../pages/Success";
+import FailedPage from "../pages/Failed";
+import OrderHistory from "../pages/OrdersHistory";
 
 const router = createBrowserRouter([
   {
@@ -71,8 +73,16 @@ const router = createBrowserRouter([
     element: <Profile />,
   },
   {
-    path: "/success",
+    path: "/orders-history",
+    element: <OrderHistory />,
+  },
+  {
+    path: "/payment-success",
     element: <SuccessPage />,
+  },
+  {
+    path: "/payment-failed",
+    element: <FailedPage />,
   },
   // {
   //   path: "/manager",

@@ -12,17 +12,20 @@ import {
   Phone,
   CreditCard,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearCart } from "../redux/cartSilce";
 import userService from "../services/user.service";
 import { updateUser } from "../redux/authSlice";
+import orderService from "../services/order.service";
 
 export default function SuccessPage() {
   const [showConfetti, setShowConfetti] = useState(true);
   const [orderData, setOrderData] = useState(null);
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch();
+  const location = useLocation();
+
   useEffect(() => {
     setMounted(true);
     const timer = setTimeout(() => setShowConfetti(false), 4000);
@@ -37,8 +40,21 @@ export default function SuccessPage() {
       } catch {
         setOrderData(null);
       }
+    } else {
+      const params = new URLSearchParams(location.search);
+      const orderCode = params.get("orderCode");
+      if (orderCode) {
+        (async () => {
+          try {
+            const data = await orderService.getOrderById(orderCode);
+            setOrderData(data);
+          } catch (error) {
+            setOrderData(null);
+          }
+        })();
+      }
     }
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     const fetchUser = async () => {

@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Coffee, User, Lock, ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import cartService from "../services/cart.service";
 import { setCartInfo } from "../redux/cartSilce";
 
@@ -57,47 +57,44 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Vui lòng kiểm tra thông tin đăng nhập");
+      toast.error("Vui lòng kiểm tra thông tin đăng nhập", {
+        theme: "colored",
+      });
       return;
     }
 
     setIsLoading(true);
 
-    toast.promise(
-      dispatch(
+    try {
+      const resultAction = await dispatch(
         login({ username: formData.username, password: formData.password })
-      ),
-      {
-        loading: "Đang đăng nhập...",
-        success: async (response) => {
-          // Check login success by status code (should be 200)
-          if (
-            response.meta.requestStatus === "fulfilled" &&
-            response.payload.status === 200
-          ) {
-            try {
-              const res = await cartService.getCart();
-              if (res && res?.data) {
-                dispatch(setCartInfo(res?.data));
-              }
-            } catch (err) {
-              toast.error("Không thể tải giỏ hàng, vui lòng thử lại sau.");
-            }
-            setTimeout(() => navigate("/menu", { replace: true }), 500);
-            return "Đăng nhập thành công!";
-          } else {
-            throw new Error("Đăng nhập thất bại");
+      );
+      // Kiểm tra login thành công
+      if (
+        resultAction.meta.requestStatus === "fulfilled" &&
+        resultAction.payload.status === 200
+      ) {
+        try {
+          const res = await cartService.getCart();
+          if (res && res?.data) {
+            dispatch(setCartInfo(res?.data));
           }
-        },
-        error: (err) => {
-          setErrors({ general: err.message });
-          return `${err.message}`;
-        },
-        finally: () => {
-          setIsLoading(false);
-        },
+        } catch (err) {
+          toast.error("Không thể tải giỏ hàng, vui lòng thử lại sau.", {
+            theme: "colored",
+          });
+        }
+        toast.success("Đăng nhập thành công!", { theme: "colored" });
+        setTimeout(() => navigate("/menu", { replace: true }), 500);
+      } else {
+        throw new Error("Đăng nhập thất bại");
       }
-    );
+    } catch (err) {
+      setErrors({ general: err.message });
+      toast.error(err.message, { theme: "colored" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

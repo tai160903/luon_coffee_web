@@ -2,246 +2,59 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Coffee,
-  Leaf,
-  UtensilsCrossed,
-  Cookie,
-  ArrowRight,
-  Loader,
-} from "lucide-react";
+import { Coffee, ArrowRight, Loader } from "lucide-react";
 import ProductService from "../services/product.service";
+import categoryService from "../services/category.service";
 import formatCurrency from "../utils/formatCurrency";
 
 function Menu() {
-  const [activeCategory, setActiveCategory] = useState("coffee");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProducts();
+    fetchCategoriesAndProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchCategoriesAndProducts = async () => {
     setIsLoading(true);
     try {
+      // Gọi API lấy danh mục
+      const categoryRes = await categoryService.getAll();
+      // Thêm mục "Tất cả"
+      const allCategory = {
+        id: "all",
+        name: "Tất Cả",
+        icon: Coffee,
+        color: "from-amber-400 to-amber-600",
+      };
+      setCategories([
+        allCategory,
+        ...(categoryRes.data || []).map((cat) => ({
+          ...cat,
+          icon: Coffee, // hoặc chọn icon phù hợp theo cat
+          color: "from-amber-500 to-amber-600", // hoặc màu theo cat
+        })),
+      ]);
+
+      // Gọi API lấy sản phẩm
       const response = await ProductService.getProducts();
       setProducts(response.data);
     } catch (error) {
-      console.error("Error fetching products:", error.message);
+      console.error("Error fetching data:", error.message);
+      setCategories([]);
       setProducts([]);
     }
     setIsLoading(false);
   };
 
-  const categories = [
-    {
-      id: "coffee",
-      name: "Cà Phê",
-      icon: Coffee,
-      color: "from-amber-500 to-amber-600",
-    },
-    {
-      id: "tea",
-      name: "Trà",
-      icon: Leaf,
-      color: "from-green-500 to-green-600",
-    },
-    {
-      id: "food",
-      name: "Đồ Ăn",
-      icon: UtensilsCrossed,
-      color: "from-orange-500 to-orange-600",
-    },
-    {
-      id: "desserts",
-      name: "Tráng Miệng",
-      icon: Cookie,
-      color: "from-pink-500 to-pink-600",
-    },
-  ];
+  // Lọc sản phẩm theo danh mục
+  const filteredItems =
+    activeCategory === "all"
+      ? products
+      : products.filter((item) => item.categoryId === activeCategory);
 
-  // Enhanced menu items data
-  const menuItems = [
-    // Coffee
-    {
-      id: 1,
-      category: "coffee",
-      name: "Cà Phê Phin Truyền Thống",
-      nameEn: "Vietnamese Drip Coffee",
-      description: "Cà phê Việt Nam truyền thống pha bằng phin với sữa đặc",
-      price: 25000,
-      popular: true,
-      time: "5-7 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 2,
-      category: "coffee",
-      name: "Cà Phê Đá",
-      nameEn: "Iced Coffee",
-      description: "Cà phê Việt Nam mát lạnh, thơm ngon giải khát",
-      price: 28000,
-      popular: true,
-      time: "3-5 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 3,
-      category: "coffee",
-      name: "Cà Phê Dừa",
-      nameEn: "Coconut Coffee",
-      description: "Cà phê pha với kem dừa tươi, hương vị nhiệt đới",
-      price: 32000,
-      time: "5-7 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 4,
-      category: "coffee",
-      name: "Cà Phê Trứng",
-      nameEn: "Egg Coffee",
-      description: "Lớp kem trứng béo ngậy trên nền cà phê đậm đà",
-      price: 35000,
-      time: "7-10 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 5,
-      category: "coffee",
-      name: "Cà Phê Sữa Nóng",
-      nameEn: "Hot Milk Coffee",
-      description: "Cà phê nóng với sữa tươi, ấm áp và thơm ngon",
-      price: 30000,
-      time: "3-5 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-
-    // Tea
-    {
-      id: 6,
-      category: "tea",
-      name: "Trà Xanh",
-      nameEn: "Green Tea",
-      description: "Trà xanh Việt Nam truyền thống, thanh mát",
-      price: 20000,
-      time: "3-5 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 7,
-      category: "tea",
-      name: "Trà Sen",
-      nameEn: "Lotus Tea",
-      description: "Trà thơm với hương sen tự nhiên, thanh khiết",
-      price: 25000,
-      popular: true,
-      time: "5-7 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 8,
-      category: "tea",
-      name: "Trà Gừng",
-      nameEn: "Ginger Tea",
-      description: "Trà gừng tươi, ấm bụng và tốt cho sức khỏe",
-      price: 22000,
-      time: "5-7 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 9,
-      category: "tea",
-      name: "Trà Đá",
-      nameEn: "Iced Tea",
-      description: "Trà đá mát lạnh, giải khát tuyệt vời",
-      price: 18000,
-      time: "2-3 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-
-    // Food
-    {
-      id: 10,
-      category: "food",
-      name: "Bánh Mì Thịt Nướng",
-      nameEn: "Grilled Pork Bánh Mì",
-      description: "Bánh mì Việt Nam với thịt nướng thơm ngon",
-      price: 45000,
-      popular: true,
-      time: "5-8 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 11,
-      category: "food",
-      name: "Gỏi Cuốn",
-      nameEn: "Fresh Spring Rolls",
-      description: "Gỏi cuốn tươi với tôm, thịt và rau thơm",
-      price: 35000,
-      time: "3-5 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 12,
-      category: "food",
-      name: "Phở Bò",
-      nameEn: "Beef Phở",
-      description: "Phở bò truyền thống với nước dùng đậm đà",
-      price: 65000,
-      popular: true,
-      time: "10-12 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 13,
-      category: "food",
-      name: "Bún Chả",
-      nameEn: "Grilled Pork with Noodles",
-      description: "Bún chả Hà Nội với thịt nướng thơm lừng",
-      price: 55000,
-      time: "8-10 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-
-    // Desserts
-    {
-      id: 14,
-      category: "desserts",
-      name: "Chè Ba Màu",
-      nameEn: "Three-Color Dessert",
-      description: "Chè ba màu truyền thống với đậu, thạch và nước cốt dừa",
-      price: 30000,
-      time: "2-3 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 15,
-      category: "desserts",
-      name: "Bánh Flan",
-      nameEn: "Vietnamese Flan",
-      description: "Bánh flan kiểu Việt với caramel thơm ngon",
-      price: 25000,
-      popular: true,
-      time: "2-3 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      id: 16,
-      category: "desserts",
-      name: "Chè Đậu Xanh",
-      nameEn: "Mung Bean Dessert",
-      description: "Chè đậu xanh mát lạnh, ngọt dịu",
-      price: 28000,
-      time: "2-3 phút",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-  ];
-
-  // Filter items by active category
-  const filteredItems = menuItems.filter(
-    (item) => item.category === activeCategory
-  );
   const activecat = categories.find((cat) => cat.id === activeCategory);
 
   if (isLoading) {
@@ -346,7 +159,7 @@ function Menu() {
 
         {/* Items Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products?.map((item) => (
+          {filteredItems?.map((item) => (
             <Link
               to={`/details/${item.id}`}
               key={item.id}

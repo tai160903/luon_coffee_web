@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCartInfo } from "../redux/cartSilce";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ProductService from "../services/product.service";
 import sizeService from "../services/size.service";
 import cartService from "../services/cart.service";
@@ -36,9 +37,17 @@ const Detail = () => {
 
   useEffect(() => {
     if (id) {
-      fetchProduct();
-      fetchSizes();
+      const fetchAll = async () => {
+        setLoading(true);
+        try {
+          await Promise.all([fetchProduct(), fetchSizes()]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAll();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // Update selectedSize object when selectedSizeId changes
@@ -50,15 +59,12 @@ const Detail = () => {
   }, [selectedSizeId, sizes]);
 
   const fetchProduct = async () => {
-    setLoading(true);
     try {
       const response = await ProductService.getProductById(id);
       setProduct(response.data);
     } catch (error) {
       console.error("Error fetching product:", error);
-      toast.error("Không thể tải thông tin sản phẩm");
-    } finally {
-      setLoading(false);
+      toast.error("Không thể tải thông tin sản phẩm", { theme: "colored" });
     }
   };
 
@@ -73,7 +79,7 @@ const Detail = () => {
     } catch (error) {
       console.error("Error fetching sizes:", error);
       setSizes([]);
-      toast.error("Không thể tải thông tin kích cỡ");
+      toast.error("Không thể tải thông tin kích cỡ", { theme: "colored" });
     }
   };
 
@@ -88,7 +94,9 @@ const Detail = () => {
 
   const handleAddToCart = async () => {
     if (!product || !selectedSize) {
-      toast.error("Vui lòng chọn đầy đủ thông tin sản phẩm");
+      toast.error("Vui lòng chọn đầy đủ thông tin sản phẩm", {
+        theme: "colored",
+      });
       return;
     }
     setAddingToCart(true);
@@ -109,9 +117,13 @@ const Detail = () => {
         }
       }
 
-      toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
+      toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`, {
+        theme: "colored",
+      });
     } catch (error) {
-      toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
+      toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.", {
+        theme: "colored",
+      });
     } finally {
       setAddingToCart(false);
     }
@@ -121,9 +133,13 @@ const Detail = () => {
     setIsFavorite(!isFavorite);
 
     if (!isFavorite) {
-      toast.success(`Đã thêm ${product.name} vào danh sách yêu thích`);
+      toast.success(`Đã thêm ${product.name} vào danh sách yêu thích`, {
+        theme: "colored",
+      });
     } else {
-      toast.success(`Đã xóa ${product.name} khỏi danh sách yêu thích`);
+      toast.success(`Đã xóa ${product.name} khỏi danh sách yêu thích`, {
+        theme: "colored",
+      });
     }
   };
 

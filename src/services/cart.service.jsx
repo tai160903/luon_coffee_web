@@ -74,12 +74,11 @@ const cartService = {
     }
   },
 
-  // Update cart item quantity
   updateCartItemQuantity: async (cartItemId, newQuantity) => {
     try {
-      const response = await instance.put(`/Cart/update-quantity`, {
+      const response = await instance.put(`/Cart/update-cart-item`, {
         cartItemId,
-        quantity: newQuantity,
+        newQuantity: newQuantity,
       });
 
       return response.data;
