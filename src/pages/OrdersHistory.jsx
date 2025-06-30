@@ -30,9 +30,11 @@ export default function OrderHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Thêm state loading
 
   useEffect(() => {
     const fetchOrders = async () => {
+      setIsLoading(true); // Bắt đầu loading
       const data = await orderService.getOrdersByCustomer();
       // Map API data về đúng format UI
       const mapped = (data.data || []).map((order) => ({
@@ -59,6 +61,7 @@ export default function OrderHistory() {
       }));
       setOrders(mapped);
       setFilteredOrders(mapped);
+      setIsLoading(false); // Kết thúc loading
     };
     fetchOrders();
   }, []);
@@ -163,6 +166,36 @@ export default function OrderHistory() {
 
   return (
     <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50 min-h-screen">
+      {/* Loading */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-white/60 flex items-center justify-center z-50">
+          <div className="flex flex-col items-center">
+            <svg
+              className="animate-spin h-10 w-10 text-amber-500 mb-4"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+            <div className="text-amber-700 font-semibold text-lg">
+              Đang tải đơn hàng...
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <div className="bg-white/80 backdrop-blur-sm py-4 border-b border-amber-100">
         <div className="container mx-auto px-4">

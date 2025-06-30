@@ -8,7 +8,7 @@ import Detail from "../pages/Detail";
 import Cart from "../pages/Cart";
 import Payment from "../pages/Payment";
 import Contact from "../pages/Contact";
-import Profile from "../pages/Profile";
+import Profile from "../pages/profile";
 import About from "../pages/About";
 // import ManagerLayout from "../components/managerLayout";
 // import Dashboard from "../pages/manager/Dashboard";
@@ -24,6 +24,8 @@ import POSLayout from "../components/posLayout";
 import SuccessPage from "../pages/Success";
 import FailedPage from "../pages/Failed";
 import OrderHistory from "../pages/OrdersHistory";
+import NotFound from "../pages/NotFound";
+import ProfileLayout from "../components/profileLayout";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +60,20 @@ const router = createBrowserRouter([
         path: "contact",
         element: <Contact />,
       },
+      {
+        path: "orders-history",
+        element: <OrderHistory />,
+      },
+      {
+        path: "profile",
+        element: <ProfileLayout />,
+        children: [
+          {
+            path: "",
+            element: <Profile />,
+          },
+        ],
+      },
     ],
   },
   {
@@ -68,14 +84,7 @@ const router = createBrowserRouter([
     path: "/register",
     element: <Register />,
   },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/orders-history",
-    element: <OrderHistory />,
-  },
+
   {
     path: "/payment-success",
     element: <SuccessPage />,
@@ -132,7 +141,7 @@ const router = createBrowserRouter([
 
   {
     path: "*",
-    element: <h1>404</h1>,
+    element: <NotFound />,
   },
 ]);
 
