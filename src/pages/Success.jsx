@@ -47,7 +47,7 @@ export default function SuccessPage() {
         (async () => {
           try {
             const data = await orderService.getOrderById(orderCode);
-            setOrderData(data);
+            setOrderData(data.data);
           } catch (error) {
             setOrderData(null);
           }
