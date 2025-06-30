@@ -3,7 +3,7 @@ import instance from "../utils/instance";
 const orderService = {
   getOrderById: async (orderId) => {
     try {
-      const response = await instance.get(`/Order/get-order-by-id/${orderId}`);
+      const response = await instance.get(`/Order/${orderId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching order:", error.message);
