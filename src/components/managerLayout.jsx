@@ -5,8 +5,6 @@ import {
   FaBoxOpen,
   FaShoppingCart,
   FaUsers,
-  FaChartBar,
-  FaCog,
   FaBars,
   FaTimes,
   FaSignOutAlt,
@@ -17,6 +15,23 @@ import { FaCoffee } from "react-icons/fa";
 
 function ManagerLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const renderNavLink = (to, icon, label) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex items-center px-4 py-3 transition-colors rounded-lg ${
+          isActive
+            ? "bg-[#6b3305] text-white"
+            : "text-white/80 hover:bg-[#6b3305] hover:text-white"
+        }`
+      }
+      end
+    >
+      {icon}
+      <span className="mx-4">{label}</span>
+    </NavLink>
+  );
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -38,7 +53,7 @@ function ManagerLayout() {
           <div className="flex items-center">
             <FaCoffee className="w-8 h-8 text-white" />
             <span className="mx-3 text-xl font-semibold text-white">
-              Viet Coffee
+              Lượn cafe
             </span>
           </div>
           <button
@@ -50,121 +65,37 @@ function ManagerLayout() {
         </div>
 
         <nav className="mt-10 px-4 space-y-2">
-          <NavLink
-            to="/manager"
-            end
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaHome className="w-5 h-5" />
-            <span className="mx-4">Dashboard</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/products"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaBoxOpen className="w-5 h-5" />
-            <span className="mx-4">Products</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/orders"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaShoppingCart className="w-5 h-5" />
-            <span className="mx-4">Orders</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/staffs"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaUsers className="w-5 h-5" />
-            <span className="mx-4">Staffs</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/customers"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaUsers className="w-5 h-5" />
-            <span className="mx-4">Customers</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/analytics"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaChartBar className="w-5 h-5" />
-            <span className="mx-4">Analytics</span>
-          </NavLink>
-
-          <NavLink
-            to="/manager/settings"
-            className={({ isActive }) =>
-              `flex items-center px-4 py-3 transition-colors rounded-lg ${
-                isActive
-                  ? "bg-[#6b3305] text-white"
-                  : "text-white/80 hover:bg-[#6b3305] hover:text-white"
-              }`
-            }
-          >
-            <FaCog className="w-5 h-5" />
-            <span className="mx-4">Settings</span>
-          </NavLink>
+          {renderNavLink(
+            "/manager",
+            <FaHome className="w-5 h-5" />,
+            "Thống kê"
+          )}
+          {renderNavLink(
+            "/manager/products",
+            <FaBoxOpen className="w-5 h-5" />,
+            "Sản phẩm"
+          )}
+          {renderNavLink(
+            "/manager/orders",
+            <FaShoppingCart className="w-5 h-5" />,
+            "Đơn"
+          )}
+          {renderNavLink(
+            "/manager/staffs",
+            <FaUsers className="w-5 h-5" />,
+            "Nhân viên"
+          )}
+          {renderNavLink(
+            "/manager/customers",
+            <FaUsers className="w-5 h-5" />,
+            "Khách hàng"
+          )}
         </nav>
 
         <div className="absolute bottom-0 w-full p-4">
-          <div className="flex items-center p-3 mb-2 bg-[#6b3305] rounded-lg">
-            <img
-              className="object-cover w-10 h-10 rounded-full"
-              src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
-              alt="User avatar"
-            />
-            <div className="mx-3">
-              <h4 className="text-sm font-medium text-white">Admin User</h4>
-              <p className="text-xs text-white/70">admin@vietcoffee.com</p>
-            </div>
-          </div>
           <button className="flex items-center w-full px-4 py-2 text-white/80 transition-colors rounded-lg hover:bg-[#6b3305] hover:text-white">
             <FaSignOutAlt className="w-5 h-5" />
-            <span className="mx-4">Logout</span>
+            <span className="mx-4">Đăng xuất</span>
           </button>
         </div>
       </div>
@@ -179,9 +110,7 @@ function ManagerLayout() {
             >
               <FaBars className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-semibold text-gray-800">
-              Admin Dashboard
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-800">Quản lý</h2>
           </div>
 
           <div className="flex items-center space-x-4">
