@@ -16,7 +16,7 @@ export const login = createAsyncThunk(
       );
 
       // Store user in localStorage
-      if (response.data) {
+      if (response.data && response.status === 200) {
         localStorage.setItem(
           "user",
           JSON.stringify(response.data.data.customer)
@@ -27,10 +27,9 @@ export const login = createAsyncThunk(
       return response;
     } catch (error) {
       const message =
-        error.response?.data?.message ||
+        error.response?.data?.detail ||
         error.message ||
         "Authentication failed";
-
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -59,7 +58,6 @@ const authSlice = createSlice({
       state.errorMessage = "";
     },
     updateUser: (state, action) => {
-      console.log("Updating user in authSlice:", action.payload);
       state.user = action.payload;
     },
   },

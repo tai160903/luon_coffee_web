@@ -201,7 +201,6 @@ const POS = () => {
 
   // Tính tổng giá
   const calculateTotalPrice = () => {
-    console.log("Calculating total price for item:", selectedItem.price);
     if (!selectedItem || !selectedSize) return 0;
     return (selectedItem.price + (selectedSize.extraPrice || 0)) * quantity;
   };

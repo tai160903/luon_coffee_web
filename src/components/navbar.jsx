@@ -197,8 +197,8 @@ const Navbar = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
-              {/* Wallet - Only show if authenticated */}
-              {isAuthenticated && (
+              {/* Wallet - Only show if authenticated and user exists in localStorage */}
+              {isAuthenticated && localUser && (
                 <div
                   to="/wallet"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 border border-gray-200 hover:border-green-200"
@@ -210,8 +210,8 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Cart */}
-              {isAuthenticated && (
+              {/* Cart - Only show if authenticated and user exists in localStorage */}
+              {isAuthenticated && localUser && (
                 <Link
                   to="/cart"
                   className="p-3 text-gray-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all duration-300 relative"
@@ -225,7 +225,28 @@ const Navbar = () => {
                 </Link>
               )}
 
-              {/* User Account - Show different options based on auth status */}
+              {isAuthenticated && (role === "STAFF" || role === "ADMIN") && (
+                <Link
+                  to="/pos"
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-emerald-100 hover:text-emerald-700 border border-emerald-400 hover:border-emerald-700 rounded-full transition-all duration-300"
+                >
+                  <TvMinimal className="w-5 h-5" />
+                  <span>POS</span>
+                </Link>
+              )}
+
+              {isAuthenticated && role === "ADMIN" && (
+                <Link
+                  to="/manager"
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-3 px-4 py-2 text-gray-700 border border-amber-400  hover:bg-amber-50  hover:text-amber-700 rounded-full transition-all duration-300"
+                >
+                  <Users className="w-5 h-5" />
+                  <span>Quản Lý</span>
+                </Link>
+              )}
+
               {!isAuthenticated ? (
                 // Not logged in - show login/register buttons
                 <div className="hidden sm:flex gap-2">
@@ -266,28 +287,6 @@ const Navbar = () => {
                           {getUserDisplayName()}
                         </p>
                       </div>
-                      {role === "STAFF" ||
-                        (role === "MANAGER" && (
-                          <Link
-                            to="/pos"
-                            onClick={() => setShowUserMenu(false)}
-                            className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                          >
-                            <TvMinimal className="w-5 h-5" />
-                            <span>POS</span>
-                          </Link>
-                        ))}
-
-                      {role === "MANAGER" && (
-                        <Link
-                          to="/manager"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          <Users className="w-5 h-5" />
-                          <span>Quản Lý</span>
-                        </Link>
-                      )}
                       <div className="py-1">
                         <Link
                           to="/profile"

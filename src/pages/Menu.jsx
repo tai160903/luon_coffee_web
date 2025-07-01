@@ -12,6 +12,7 @@ function Menu() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const customer = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     fetchCategoriesAndProducts();
@@ -193,11 +194,11 @@ function Menu() {
                   <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-2">
                     {item.description}
                   </p>
-
-                  {/* Action Button */}
-                  <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center gap-2">
-                    Đặt Món
-                  </button>
+                  {customer && (
+                    <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center gap-2">
+                      Đặt Món
+                    </button>
+                  )}
                 </div>
               </div>
             </Link>

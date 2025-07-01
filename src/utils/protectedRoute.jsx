@@ -14,7 +14,7 @@ const ProtectedRoute = ({ token, requiredRole, children }) => {
         "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
       ];
 
-    if (requiredRole && userRole !== requiredRole) {
+    if (requiredRole && !requiredRole.includes(userRole)) {
       return <Navigate to="*" replace />;
     }
   } catch (error) {

@@ -59,9 +59,7 @@ export default function SuccessPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        console.log("Fetching user profile...");
         const res = await userService.getProfile();
-        console.log("User profile response:", res.data.data);
         dispatch(updateUser(res.data.data));
         localStorage.setItem("user", JSON.stringify(res.data.data));
       } catch (e) {

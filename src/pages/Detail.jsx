@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Star,
-  Heart,
   Plus,
   Minus,
   ShoppingCart,
@@ -32,8 +31,8 @@ const Detail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
-  const [isFavorite, setIsFavorite] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const customer = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     if (id) {
@@ -129,20 +128,6 @@ const Detail = () => {
     }
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-
-    if (!isFavorite) {
-      toast.success(`Đã thêm ${product.name} vào danh sách yêu thích`, {
-        theme: "colored",
-      });
-    } else {
-      toast.success(`Đã xóa ${product.name} khỏi danh sách yêu thích`, {
-        theme: "colored",
-      });
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-amber-50 to-white">
@@ -181,18 +166,6 @@ const Detail = () => {
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <button
-                  onClick={toggleFavorite}
-                  className={`absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isFavorite
-                      ? "bg-red-500 text-white"
-                      : "bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-red-50 hover:text-red-500"
-                  }`}
-                >
-                  <Heart
-                    className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`}
-                  />
-                </button>
               </div>
             </div>
           </div>
@@ -293,53 +266,54 @@ const Detail = () => {
               </div>
             </div>
 
-            {/* Quantity and Add to Cart */}
-            <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <div className="text-3xl font-bold text-amber-700">
-                    {calculateTotalPrice().toLocaleString("vi-VN")}₫
-                  </div>
-                  <div className="text-sm text-gray-600">Tổng cộng</div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center border border-gray-300 rounded-2xl">
-                    <button
-                      onClick={decrementQuantity}
-                      disabled={quantity <= 1}
-                      className="p-3 hover:bg-gray-100 rounded-l-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <div className="px-6 py-3 font-semibold min-w-[60px] text-center">
-                      {quantity}
+            {customer && (
+              <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <div className="text-3xl font-bold text-amber-700">
+                      {calculateTotalPrice().toLocaleString("vi-VN")}₫
                     </div>
-                    <button
-                      onClick={incrementQuantity}
-                      className="p-3 hover:bg-gray-100 rounded-r-2xl transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
+                    <div className="text-sm text-gray-600">Tổng cộng</div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center border border-gray-300 rounded-2xl">
+                      <button
+                        onClick={decrementQuantity}
+                        disabled={quantity <= 1}
+                        className="p-3 hover:bg-gray-100 rounded-l-2xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <div className="px-6 py-3 font-semibold min-w-[60px] text-center">
+                        {quantity}
+                      </div>
+                      <button
+                        onClick={incrementQuantity}
+                        className="p-3 hover:bg-gray-100 rounded-r-2xl transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <button
-                onClick={handleAddToCart}
-                disabled={addingToCart}
-                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {addingToCart ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" />
-                    Thêm Vào Giỏ Hàng
-                  </>
-                )}
-              </button>
-            </div>
+                <button
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {addingToCart ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      Thêm Vào Giỏ Hàng
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

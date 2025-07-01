@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Coffee, Facebook, Chrome } from "lucide-react";
+import { Eye, EyeOff, Coffee } from "lucide-react";
 import authService from "../services/auth.service";
 
 const Register = () => {
@@ -75,11 +75,6 @@ const Register = () => {
       setErrors({ username: "Đăng ký thất bại. Vui lòng thử lại." });
     }
     setIsLoading(false);
-  };
-
-  const handleSocialRegister = (provider) => {
-    console.log(`Register with ${provider}`);
-    // Handle social register
   };
 
   return (
@@ -265,28 +260,6 @@ const Register = () => {
               Hoặc đăng ký với
             </span>
             <div className="flex-1 border-t border-gray-200"></div>
-          </div>
-
-          {/* Social Register */}
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => handleSocialRegister("google")}
-              className="flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-2xl hover:border-amber-300 hover:bg-amber-50 transition-all duration-300 group"
-            >
-              <Chrome className="w-5 h-5 text-gray-600 group-hover:text-amber-600" />
-              <span className="font-medium text-gray-700 group-hover:text-amber-700">
-                Google
-              </span>
-            </button>
-            <button
-              onClick={() => handleSocialRegister("facebook")}
-              className="flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-2xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 group"
-            >
-              <Facebook className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
-              <span className="font-medium text-gray-700 group-hover:text-blue-700">
-                Facebook
-              </span>
-            </button>
           </div>
 
           {/* Footer */}

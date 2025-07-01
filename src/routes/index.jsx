@@ -16,9 +16,7 @@ import Product from "../pages/manager/Product";
 import Staff from "../pages/manager/Staff";
 import Inventory from "../pages/manager/Inventory";
 import MenuManagement from "../pages/manager/MenuManager";
-import DashboardPOS from "../pages/pos/DashboardPOS";
 import Orders from "../pages/pos/Orders";
-import Reports from "../pages/pos/Reports";
 import Sales from "../pages/pos/Sales";
 import POSLayout from "../components/posLayout";
 import SuccessPage from "../pages/Success";
@@ -122,7 +120,7 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute
         token={localStorage.getItem("token")}
-        requiredRole="manager"
+        requiredRole="ADMIN"
       >
         <ManagerLayout />
       </ProtectedRoute>
@@ -155,7 +153,7 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute
         token={localStorage.getItem("token")}
-        requiredRole="STAFF"
+        requiredRole={["STAFF", "ADMIN"]}
       >
         <POSLayout />
       </ProtectedRoute>
@@ -163,19 +161,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <DashboardPOS />,
+        element: <Sales />,
       },
       {
         path: "orders",
         element: <Orders />,
-      },
-      {
-        path: "reports",
-        element: <Reports />,
-      },
-      {
-        path: "sales",
-        element: <Sales />,
       },
     ],
   },

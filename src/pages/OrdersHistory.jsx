@@ -140,8 +140,6 @@ export default function OrderHistory() {
   };
 
   const handleReorder = (order) => {
-    // Logic để đặt lại đơn hàng
-    console.log("Reordering:", order.id);
     alert(`Đang thêm các món từ đơn hàng ${order.id} vào giỏ hàng...`);
   };
 

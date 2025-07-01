@@ -57,9 +57,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Vui lòng kiểm tra thông tin đăng nhập", {
-        theme: "colored",
-      });
       return;
     }
 
@@ -69,7 +66,6 @@ const Login = () => {
       const resultAction = await dispatch(
         login({ username: formData.username, password: formData.password })
       );
-      // Kiểm tra login thành công
       if (
         resultAction.meta.requestStatus === "fulfilled" &&
         resultAction.payload.status === 200
@@ -87,11 +83,10 @@ const Login = () => {
         toast.success("Đăng nhập thành công!", { theme: "colored" });
         setTimeout(() => navigate("/menu", { replace: true }), 500);
       } else {
-        throw new Error("Đăng nhập thất bại");
+        throw new Error(resultAction.payload);
       }
     } catch (err) {
       setErrors({ general: err.message });
-      toast.error(err.message, { theme: "colored" });
     } finally {
       setIsLoading(false);
     }
