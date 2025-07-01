@@ -51,7 +51,7 @@ const refreshAuthToken = async () => {
     }
 
     // Call refresh token API
-    const response = await refreshInstance.post("/auth/refresh-token", {
+    const response = await refreshInstance.post("/User/refresh-token", {
       refreshToken: refreshToken,
     });
 

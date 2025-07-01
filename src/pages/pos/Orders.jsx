@@ -11,6 +11,10 @@ import {
   RefreshCw,
 } from "lucide-react";
 import orderService from "../../services/order.service";
+import formatCurrency from "../../utils/formatCurrency";
+import formatTime from "../../utils/formatTime";
+import { toast } from "react-toastify";
+import formatDateTime from "../../utils/formatDateTime";
 
 const Orders = () => {
   const [selectedStatus, setSelectedStatus] = useState("NEW");
@@ -93,7 +97,6 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  // Moved fetch orders to a separate function for clarity
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
@@ -107,7 +110,6 @@ const Orders = () => {
     }
   };
 
-  // Map API response data to our application's data structure
   const mapOrdersData = (ordersData) => {
     return ordersData.map((order) => ({
       id: order.id,
@@ -145,77 +147,34 @@ const Orders = () => {
     return matchesStatus && matchesSearch;
   });
 
-  // Get status color from statusOptions array
   const getStatusColor = (status) => {
     const statusOption = statusOptions.find((option) => option.id === status);
     return statusOption ? statusOption.color : "bg-gray-100 text-gray-800";
   };
 
-  // Get status icon based on status
   const getStatusIcon = (status) => {
     return STATUS.ICON[status] || <AlertCircle className="w-4 h-4" />;
   };
 
-  // Update order to next status
   const updateOrderToNextStatus = async (order) => {
     try {
       setIsLoading(true);
 
-      // Get next status
       const nextStatus = STATUS.NEXT[order.status];
-
-      // If current status is final, do nothing
       if (nextStatus === order.status) {
         return;
       }
-
       const statusCode = STATUS.STRING_TO_CODE[nextStatus];
-
-      console.log(
-        `Updating order ${order.id} from ${order.status} to ${nextStatus} (${statusCode})`
-      );
-
       const res = await orderService.updateStatus(order.id, statusCode);
       if (res) {
-        // Refresh orders list after successful update
         await fetchOrders();
       }
     } catch (error) {
-      alert("Cập nhật trạng thái đơn hàng thất bại!");
+      toast.error("Cập nhật trạng thái đơn hàng thất bại!");
       console.error(error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Formatting utilities
-  const formatTime = (timeString) => {
-    if (!timeString) return "";
-    return new Date(timeString).toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatDateTime = (timeString) => {
-    if (!timeString) return "";
-    const date = new Date(timeString);
-    return (
-      date.toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }) +
-      " " +
-      date.toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
-  };
-
-  const formatCurrency = (amount) => {
-    return amount.toLocaleString("vi-VN") + "₫";
   };
 
   // Get payment method display text

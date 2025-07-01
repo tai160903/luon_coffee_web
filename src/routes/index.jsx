@@ -26,6 +26,7 @@ import FailedPage from "../pages/Failed";
 import OrderHistory from "../pages/OrdersHistory";
 import NotFound from "../pages/NotFound";
 import ProfileLayout from "../components/profileLayout";
+import ProtectedRoute from "../utils/protectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -46,11 +47,19 @@ const router = createBrowserRouter([
       },
       {
         path: "cart",
-        element: <Cart />,
+        element: (
+          <ProtectedRoute token={localStorage.getItem("token")}>
+            <Cart />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "payment",
-        element: <Payment />,
+        element: (
+          <ProtectedRoute token={localStorage.getItem("token")}>
+            <Payment />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "about",
@@ -62,11 +71,19 @@ const router = createBrowserRouter([
       },
       {
         path: "orders-history",
-        element: <OrderHistory />,
+        element: (
+          <ProtectedRoute token={localStorage.getItem("token")}>
+            <OrderHistory />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",
-        element: <ProfileLayout />,
+        element: (
+          <ProtectedRoute token={localStorage.getItem("token")}>
+            <ProfileLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             path: "",
@@ -84,18 +101,32 @@ const router = createBrowserRouter([
     path: "/register",
     element: <Register />,
   },
-
   {
     path: "/payment-success",
-    element: <SuccessPage />,
+    element: (
+      <ProtectedRoute token={localStorage.getItem("token")}>
+        <SuccessPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/payment-cancel",
-    element: <FailedPage />,
+    element: (
+      <ProtectedRoute token={localStorage.getItem("token")}>
+        <FailedPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/manager",
-    element: <ManagerLayout />,
+    element: (
+      <ProtectedRoute
+        token={localStorage.getItem("token")}
+        requiredRole="manager"
+      >
+        <ManagerLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",
@@ -121,7 +152,14 @@ const router = createBrowserRouter([
   },
   {
     path: "/pos",
-    element: <POSLayout />,
+    element: (
+      <ProtectedRoute
+        token={localStorage.getItem("token")}
+        requiredRole="STAFF"
+      >
+        <POSLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",
@@ -135,10 +173,12 @@ const router = createBrowserRouter([
         path: "reports",
         element: <Reports />,
       },
-      { path: "sales", element: <Sales /> },
+      {
+        path: "sales",
+        element: <Sales />,
+      },
     ],
   },
-
   {
     path: "*",
     element: <NotFound />,

@@ -99,7 +99,7 @@ function Menu() {
       </div>
 
       {/* Category Navigation */}
-      <div className="sticky top-0 bg-white/80 backdrop-blur-lg shadow-lg z-50 border-b border-amber-100">
+      <div className="sticky top-0 bg-white/80 backdrop-blur-lg shadow-lg z-10 border-b border-amber-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex overflow-x-auto py-6 gap-4 scrollbar-hide">
             {categories.map((category) => {
