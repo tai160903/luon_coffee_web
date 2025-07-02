@@ -21,7 +21,7 @@ import {
   Star,
   Package,
 } from "lucide-react";
-import orderService from "../services/order.service";
+import orderService from "../../services/order.service";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);

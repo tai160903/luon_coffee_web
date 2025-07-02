@@ -11,6 +11,16 @@ const ProductService = {
     }
   },
 
+  async getBestSellers() {
+    try {
+      const response = await instance.get("/Product/BestSeller");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching best sellers:", error.message);
+      return [];
+    }
+  },
+
   async getProductById(id) {
     try {
       const response = await instance.get(`/Product/${id}`);

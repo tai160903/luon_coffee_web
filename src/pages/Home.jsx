@@ -12,8 +12,24 @@ import { CafeExperienceSection } from "../components/cafe-experience";
 // images
 import heroImage from "../assets/images/hero-coffee.jpg";
 import aboutImage from "../assets/images/about-coffee.jpg";
+import { useEffect, useState } from "react";
+import ProductService from "../services/product.service";
+import formatCurrency from "../utils/formatCurrency";
 
 function Home() {
+  const [bestSellers, setBestSellers] = useState([]);
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        const response = await ProductService.getBestSellers();
+        setBestSellers(response.data);
+      } catch (error) {
+        console.error("Error fetching best sellers:", error);
+      }
+    };
+    fetchBestSellers();
+  }, []);
+
   return (
     <div className="font-sans overflow-x-hidden">
       {/* Hero Section */}
@@ -145,42 +161,31 @@ function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                  <img
-                    src="/placeholder.svg?height=400&width=300"
-                    alt={product.name}
-                    className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute bottom-4 left-4 right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 opacity-0 group-hover:opacity-100">
-                    <button className="w-full bg-white text-amber-800 font-bold py-3 px-6 rounded-full hover:bg-amber-50 transition-colors duration-200">
-                      Thêm Vào Giỏ
-                    </button>
+            {bestSellers?.map((product) => (
+              <Link to={`/details/${product.id}`} key={product.id}>
+                <div key={product.id} className="group cursor-pointer">
+                  <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-gray-100 to-gray-200">
+                    <img
+                      src={
+                        product.image || "/placeholder.svg?height=300&width=300"
+                      }
+                      alt={product.name}
+                      className="w-full h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                  {product.sale && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      GIẢM GIÁ
-                    </div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">
-                    {product.name}
-                  </h3>
-                  <div className="flex justify-center items-center gap-2">
-                    <span className="text-2xl font-bold text-amber-700">
-                      {product.price.toLocaleString("vi-VN")}₫
-                    </span>
-                    {product.sale && (
-                      <span className="text-sm text-gray-500 line-through">
-                        {(product.price * 1.2).toLocaleString("vi-VN")}₫
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">
+                      {product.name}
+                    </h3>
+                    <div className="flex justify-center items-center gap-2">
+                      <span className="text-2xl font-bold text-amber-700">
+                        {formatCurrency(product.price)}
                       </span>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -266,34 +271,6 @@ const features = [
     title: "Pha Chế Tâm Huyết",
     description:
       "Mỗi thức uống được pha chế cẩn thận bởi các barista giàu kinh nghiệm sử dụng kỹ thuật Việt Nam chính hiệu.",
-  },
-];
-
-// Sample data for featured products
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Cà Phê Đá Việt Nam",
-    price: 25000,
-    sale: false,
-  },
-  {
-    id: 2,
-    name: "Cà Phê Phin Truyền Thống",
-    price: 20000,
-    sale: false,
-  },
-  {
-    id: 3,
-    name: "Cà Phê Dừa",
-    price: 30000,
-    sale: true,
-  },
-  {
-    id: 4,
-    name: "Cà Phê Trứng Việt Nam",
-    price: 35000,
-    sale: false,
   },
 ];
 

@@ -15,7 +15,6 @@ export const login = createAsyncThunk(
         }
       );
 
-      // Store user in localStorage
       if (response.data && response.status === 200) {
         localStorage.setItem(
           "user",
@@ -24,7 +23,11 @@ export const login = createAsyncThunk(
         localStorage.setItem("token", response.data.data.accessToken);
         localStorage.setItem("refreshToken", response.data.data.refreshToken);
       }
-      return response;
+
+      return {
+        status: response.status,
+        data: response.data,
+      };
     } catch (error) {
       const message =
         error.response?.data?.detail ||
@@ -69,8 +72,8 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload;
+        state.isAuthenticated = action.payload.status === 200;
+        state.user = action.payload.data?.data?.customer || null;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;

@@ -15,7 +15,14 @@ import userService from "../../services/user.service";
 
 export default function ProfileInfo() {
   const [isEditing, setIsEditing] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState({
+    fullName: "N/A",
+    email: "N/A",
+    phone: "N/A",
+    dateOfBirth: "N/A",
+    address: "N/A",
+    gender: "N/A",
+  });
   const [editInfo, setEditInfo] = useState(null);
 
   useEffect(() => {
