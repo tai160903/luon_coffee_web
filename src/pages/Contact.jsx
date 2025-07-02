@@ -197,18 +197,21 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      // Thay thế các thông số này với ID của bạn từ tài khoản EmailJS
+      // Chuẩn bị dữ liệu theo đúng cấu trúc template
+      const templateParams = {
+        from_name: formData.name,
+        reply_to: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        subject: formData.subject,
+        send_time: new Date().toLocaleString("vi-VN"),
+      };
+
       const result = await emailjs.send(
-        "YOUR_SERVICE_ID", // Từ EmailJS dashboard
-        "YOUR_TEMPLATE_ID", // Từ EmailJS dashboard
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          subject: formData.subject,
-          message: formData.message,
-        },
-        "YOUR_PUBLIC_KEY" // Từ EmailJS dashboard
+        `${import.meta.env.VITE_SERVICE_ID}`,
+        `${import.meta.env.VITE_TEMPLATE_ID}`,
+        templateParams,
+        `${import.meta.env.VITE_PUBLIC_KEY}`
       );
 
       if (result.text === "OK") {
@@ -230,7 +233,6 @@ const Contact = () => {
     }
   };
 
-  // Replace the Map Placeholder div with this MapContainer
   const mapSection = (
     <div className="bg-white rounded-3xl overflow-hidden h-80 mb-8 border border-gray-200 shadow-md">
       <MapContainer

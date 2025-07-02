@@ -15,6 +15,8 @@ import ProductService from "../../services/product.service";
 import { Loader } from "lucide-react";
 import formatCurrency from "../../utils/formatCurrency";
 import catagoryService from "../../services/category.service";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Product = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -31,6 +33,17 @@ const Product = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState(["All"]);
   const [loading, setLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === "asc" ? (
+      <FaChevronUp className="ml-1" />
+    ) : (
+      <FaChevronDown className="ml-1" />
+    );
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -109,27 +122,205 @@ const Product = () => {
     }
   };
 
-  const handleDelete = (productId) => {
-    setProducts(products.filter((product) => product.id !== productId));
-    setSelectedProducts(selectedProducts.filter((id) => id !== productId));
-    setDeleteConfirmProduct(null);
+  const validateProductForm = () => {
+    const nameInput = document.getElementById("name").value.trim();
+    const priceInput = document.getElementById("price").value;
+    const categoryIdInput = document.getElementById("categoryId").value;
+
+    const errors = [];
+
+    // Name validations
+    if (!nameInput) {
+      errors.push("Tên sản phẩm không được để trống");
+    } else if (nameInput.length > 100) {
+      errors.push("Tên sản phẩm không được vượt quá 100 ký tự");
+    }
+
+    // Price validations
+    if (!priceInput) {
+      errors.push("Giá sản phẩm không được để trống");
+    } else {
+      const price = parseFloat(priceInput);
+      if (isNaN(price)) {
+        errors.push("Giá sản phẩm phải là số");
+      } else if (price <= 0) {
+        errors.push("Giá sản phẩm phải lớn hơn 0");
+      } else if (price > 1000000) {
+        // 1 million VND limit example
+        errors.push("Giá sản phẩm quá cao, vui lòng kiểm tra lại");
+      }
+    }
+
+    // Category validations
+    if (!categoryIdInput) {
+      errors.push("Vui lòng chọn danh mục");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors: errors,
+    };
   };
 
-  const handleBulkDelete = () => {
-    setProducts(
-      products.filter((product) => !selectedProducts.includes(product.id))
-    );
-    setSelectedProducts([]);
-    setSelectAll(false);
+  const handleSaveProduct = async () => {
+    const validation = validateProductForm();
+
+    if (!validation.isValid) {
+      // Show all errors as toast
+      validation.errors.forEach((error) => toast.error(error));
+      return;
+    }
+
+    // Get input values
+    const nameInput = document.getElementById("name").value;
+    const descriptionInput = document.getElementById("description").value;
+    const priceInput = document.getElementById("price").value;
+    const categoryIdInput = document.getElementById("categoryId").value;
+
+    setLoading(true);
+
+    try {
+      // Apply capitalization to product name
+      const formattedName = capitalizeWords(nameInput.trim());
+
+      const productData = {
+        name: formattedName,
+        description: descriptionInput,
+        price: parseFloat(priceInput),
+        image: imageUrl || editingProduct?.image || "",
+        categoryId: categoryIdInput,
+      };
+
+      let response;
+
+      if (editingProduct) {
+        response = await ProductService.updateProduct(
+          editingProduct.id,
+          productData
+        );
+
+        if (response) {
+          toast.success("Cập nhật sản phẩm thành công!");
+
+          setProducts(
+            products.map((p) =>
+              p.id === editingProduct.id
+                ? { ...p, ...productData, image: imageUrl || p.image }
+                : p
+            )
+          );
+        } else {
+          throw new Error("Không thể cập nhật sản phẩm");
+        }
+      } else {
+        response = await ProductService.createProduct(productData);
+
+        if (response) {
+          toast.success("Thêm sản phẩm thành công!");
+
+          await fetchProducts();
+        } else {
+          throw new Error("Không thể thêm sản phẩm mới");
+        }
+      }
+
+      setShowAddModal(false);
+      setEditingProduct(null);
+      setImageUrl("");
+      setImagePreview("");
+    } catch (error) {
+      console.error("Error saving product:", error);
+      toast.error(`Lỗi: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getSortIndicator = (key) => {
-    if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" ? (
-      <FaChevronUp className="ml-1 text-xs" />
-    ) : (
-      <FaChevronDown className="ml-1 text-xs" />
-    );
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        if (!file.type.match("image.*")) {
+          toast.error("Vui lòng chọn tệp hình ảnh");
+          return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+          toast.error(
+            "Kích thước hình ảnh quá lớn. Vui lòng chọn hình dưới 2MB"
+          );
+          return;
+        }
+
+        const base64String = await convertFileToBase64(file);
+
+        setImageUrl(base64String);
+        setImagePreview(base64String);
+      } catch (error) {
+        console.error("Error converting image to base64:", error);
+        toast.error("Có lỗi khi xử lý hình ảnh. Vui lòng thử lại.");
+      }
+    }
+  };
+
+  const capitalizeWords = (text) => {
+    if (!text) return "";
+    return text
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const handleDelete = async (productId) => {
+    try {
+      setLoading(true);
+
+      // Normally you would call your API here
+      // const response = await ProductService.deleteProduct(productId);
+
+      // For now, just update the UI
+      setProducts(products.filter((product) => product.id !== productId));
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
+      toast.success("Xóa sản phẩm thành công!");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error(`Lỗi: ${error.message}`);
+    } finally {
+      setLoading(false);
+      setDeleteConfirmProduct(null);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      setLoading(true);
+
+      // Normally you would call your API here
+      // For bulk delete or loop through each product
+
+      // For now, just update the UI
+      setProducts(
+        products.filter((product) => !selectedProducts.includes(product.id))
+      );
+      setSelectedProducts([]);
+      toast.success(`Đã xóa ${selectedProducts.length} sản phẩm thành công!`);
+    } catch (error) {
+      console.error("Error bulk deleting products:", error);
+      toast.error(`Lỗi: ${error.message}`);
+    } finally {
+      setLoading(false);
+      setDeleteConfirmProduct(null);
+      setSelectAll(false);
+    }
   };
 
   return (
@@ -137,9 +328,7 @@ const Product = () => {
       {loading ? (
         <div className="flex justify-center items-center h-64 flex-col">
           <Loader className="w-12 h-12 text-amber-400 animate-spin mb-4" />
-          <p className="text-gray-600 text-lg text-amber-300">
-            Đang tải danh sách
-          </p>
+          <p className="text-lg text-amber-300">Đang tải danh sách</p>
         </div>
       ) : (
         <>
@@ -328,7 +517,7 @@ const Product = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(product.price)}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate">
                         {product.description}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -374,7 +563,9 @@ const Product = () => {
                 <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                   <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                      {editingProduct ? "Edit Product" : "Add New Product"}
+                      {editingProduct
+                        ? "Chỉnh Sửa Sản Phẩm"
+                        : "Thêm Sản Phẩm Mới"}
                     </h3>
                     <form className="space-y-4">
                       <div>
@@ -382,68 +573,71 @@ const Product = () => {
                           htmlFor="name"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Product Name
+                          Tên Sản Phẩm
                         </label>
                         <input
                           type="text"
                           name="name"
                           id="name"
                           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
-                          defaultValue={editingProduct?.name}
+                          defaultValue={editingProduct?.name || ""}
+                          onBlur={(e) => {
+                            e.target.value = capitalizeWords(
+                              e.target.value.trim()
+                            );
+                          }}
                         />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label
-                            htmlFor="price"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Price ($)
-                          </label>
-                          <input
-                            type="number"
-                            name="price"
-                            id="price"
-                            step="0.01"
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
-                            defaultValue={editingProduct?.price}
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="stock"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Stock
-                          </label>
-                          <input
-                            type="number"
-                            name="stock"
-                            id="stock"
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
-                            defaultValue={editingProduct?.stock}
-                          />
-                        </div>
                       </div>
 
                       <div>
                         <label
-                          htmlFor="category"
+                          htmlFor="description"
                           className="block text-sm font-medium text-gray-700"
                         >
-                          Category
+                          Mô Tả
+                        </label>
+                        <textarea
+                          name="description"
+                          id="description"
+                          rows="3"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
+                          defaultValue={editingProduct?.description || ""}
+                        ></textarea>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="price"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Giá (VNĐ)
+                        </label>
+                        <input
+                          type="number"
+                          name="price"
+                          id="price"
+                          step="1000"
+                          min="0"
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
+                          defaultValue={editingProduct?.price || 0}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="categoryId"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Danh Mục
                         </label>
                         <select
-                          id="category"
-                          name="category"
+                          id="categoryId"
+                          name="categoryId"
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513] rounded-md"
-                          defaultValue={
-                            editingProduct?.category || categories[1]
-                          }
+                          defaultValue={editingProduct?.category?.id || ""}
                         >
-                          {categories.slice(1).map((category, index) => (
-                            <option key={index} value={category.name}>
+                          {categories.slice(1).map((category) => (
+                            <option key={category.id} value={category.id}>
                               {category.name}
                             </option>
                           ))}
@@ -452,14 +646,14 @@ const Product = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          Product Image
+                          Hình Ảnh Sản Phẩm
                         </label>
-                        <div className="mt-1 flex items-center">
+                        <div className="mt-1 flex flex-col space-y-2">
                           <div className="h-32 w-32 rounded overflow-hidden bg-gray-100">
-                            {editingProduct?.image ? (
+                            {editingProduct?.image || imagePreview ? (
                               <img
-                                src={editingProduct.image}
-                                alt={editingProduct.name}
+                                src={imagePreview || editingProduct?.image}
+                                alt={editingProduct?.name || "Product preview"}
                                 className="h-full w-full object-cover"
                               />
                             ) : (
@@ -468,12 +662,30 @@ const Product = () => {
                               </div>
                             )}
                           </div>
-                          <button
-                            type="button"
-                            className="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8B4513]"
-                          >
-                            Upload
-                          </button>
+                          <div className="flex items-center">
+                            <input
+                              type="text"
+                              name="imageUrl"
+                              placeholder="URL hình ảnh"
+                              className="flex-1 border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
+                              value={imageUrl}
+                              onChange={(e) => {
+                                setImageUrl(e.target.value);
+                                setImagePreview(e.target.value);
+                              }}
+                            />
+                            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                              URL
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
+                            />
+                          </div>
                         </div>
                       </div>
                     </form>
@@ -483,11 +695,10 @@ const Product = () => {
                       type="button"
                       className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#8B4513] text-base font-medium text-white hover:bg-[#6B3105] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8B4513] sm:ml-3 sm:w-auto sm:text-sm"
                       onClick={() => {
-                        setShowAddModal(false);
-                        setEditingProduct(null);
+                        handleSaveProduct();
                       }}
                     >
-                      {editingProduct ? "Save Changes" : "Add Product"}
+                      {editingProduct ? "Lưu Thay Đổi" : "Thêm Sản Phẩm"}
                     </button>
                     <button
                       type="button"
@@ -495,9 +706,11 @@ const Product = () => {
                       onClick={() => {
                         setShowAddModal(false);
                         setEditingProduct(null);
+                        setImageUrl("");
+                        setImagePreview("");
                       }}
                     >
-                      Cancel
+                      Hủy
                     </button>
                   </div>
                 </div>
