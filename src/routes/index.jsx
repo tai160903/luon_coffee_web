@@ -25,6 +25,7 @@ import OrderHistory from "../pages/profile/OrdersHistory";
 import NotFound from "../pages/NotFound";
 import ProfileLayout from "../components/profileLayout";
 import ProtectedRoute from "../utils/protectedRoute";
+import Location from "../pages/Location";
 
 const router = createBrowserRouter([
   {
@@ -68,12 +69,8 @@ const router = createBrowserRouter([
         element: <Contact />,
       },
       {
-        path: "orders-history",
-        element: (
-          <ProtectedRoute token={localStorage.getItem("token")}>
-            <OrderHistory />
-          </ProtectedRoute>
-        ),
+        path: "location",
+        element: <Location />,
       },
       {
         path: "profile",
@@ -86,6 +83,10 @@ const router = createBrowserRouter([
           {
             path: "",
             element: <Profile />,
+          },
+          {
+            path: "orders-history",
+            element: <OrderHistory />,
           },
         ],
       },

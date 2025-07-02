@@ -111,6 +111,7 @@ const Navbar = () => {
     { path: "/", name: "Trang Chủ", nameEn: "Home", icon: Home },
     { path: "/menu", name: "Thực Đơn", nameEn: "Menu", icon: UtensilsCrossed },
     { path: "/about", name: "Về Chúng Tôi", nameEn: "About", icon: Info },
+    { path: "/location", name: "Vị Trí", nameEn: "Location", icon: MapPin },
     { path: "/contact", name: "Liên Hệ", nameEn: "Contact", icon: Mail },
   ];
 

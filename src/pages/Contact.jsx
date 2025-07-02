@@ -19,6 +19,20 @@ import {
   Star,
   CheckCircle,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import emailjs from "@emailjs/browser";
+import { toast } from "react-toastify";
+
+// Fix for Leaflet's default icon path issues
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -32,29 +46,38 @@ const Contact = () => {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
+  // Shop location (for the map)
+  const shopLocation = {
+    name: "Lượn Cà Phê - Khổng Tử",
+    address: "22 Khổng Tử, Bình Thọ, Thủ Đức, Hồ Chí Minh, Việt Nam",
+    phone: "0927 363 868",
+    hours: "7:00 - 12:00 | 17:00 - 22:00",
+    position: [10.8450912, 106.7668635], // [lat, lng]
+  };
+
   const contactInfo = [
     {
       icon: MapPin,
       title: "Địa Chỉ Quán",
-      details: ["123 Nguyễn Huệ, Quận 1", "TP. Hồ Chí Minh, Việt Nam"],
+      details: ["22 Khổng Tử, Bình Thọ", "Thủ Đức, TP.HCM, Việt Nam"],
       color: "from-red-500 to-red-600",
     },
     {
       icon: Phone,
       title: "Điện Thoại",
-      details: ["(028) 3822 1234", "0901 234 567"],
+      details: ["0927 363 868"],
       color: "from-green-500 to-green-600",
     },
     {
       icon: Mail,
       title: "Email",
-      details: ["info@caphevietnm.com", "order@caphevietnm.com"],
+      details: ["vietcafe19@gmail.com"],
       color: "from-blue-500 to-blue-600",
     },
     {
       icon: Clock,
       title: "Giờ Mở Cửa",
-      details: ["Thứ 2-6: 7:00 - 19:00", "Thứ 7-CN: 8:00 - 20:00"],
+      details: ["7:00 - 12:00", "17:00 - 22:00"],
       color: "from-amber-500 to-amber-600",
     },
   ];
@@ -88,19 +111,19 @@ const Contact = () => {
       icon: Car,
       title: "Đi Xe Máy/Ô Tô",
       description:
-        "Từ Bến Thành Market, đi thẳng đường Nguyễn Huệ 200m. Có chỗ đậu xe miễn phí.",
+        'Từ trung tâm Thủ Đức, đi theo đường Võ Văn Ngân, rẽ vào đường Khổng Tử. Quán nằm ở số 22, có bảng hiệu "Lượn Cà Phê" phía trước. Có chỗ đỗ xe rộng rãi phía trước quán.',
     },
     {
       icon: Bus,
       title: "Đi Xe Bus",
       description:
-        "Tuyến 03, 19, 36 dừng tại trạm Nguyễn Huệ. Đi bộ 2 phút đến quán.",
+        "Các tuyến xe buýt 8, 19 và 53 đi qua khu vực này. Xuống tại trạm gần ngã tư Võ Văn Ngân, đi bộ khoảng 5 phút để đến quán.",
     },
     {
       icon: Navigation,
       title: "Grab/Taxi",
       description:
-        "Tìm kiếm 'Cà Phê Việt - 123 Nguyễn Huệ' trên ứng dụng Grab hoặc báo tài xế.",
+        "Tìm kiếm 'Lượn Cà Phê - 22 Khổng Tử, Bình Thọ' trên ứng dụng Grab hoặc báo tài xế đến địa chỉ này.",
     },
   ];
 
@@ -172,19 +195,71 @@ const Contact = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    // Simulate form submission
-    setTimeout(() => {
+
+    try {
+      // Thay thế các thông số này với ID của bạn từ tài khoản EmailJS
+      const result = await emailjs.send(
+        "YOUR_SERVICE_ID", // Từ EmailJS dashboard
+        "YOUR_TEMPLATE_ID", // Từ EmailJS dashboard
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+        },
+        "YOUR_PUBLIC_KEY" // Từ EmailJS dashboard
+      );
+
+      if (result.text === "OK") {
+        setSubmitted(true);
+        toast.success("Tin nhắn của bạn đã được gửi thành công!");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+      }
+    } catch (error) {
+      console.error("Email error:", error);
+      toast.error("Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau!");
+    } finally {
       setIsSubmitting(false);
-      setSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-    }, 2000);
+    }
   };
+
+  // Replace the Map Placeholder div with this MapContainer
+  const mapSection = (
+    <div className="bg-white rounded-3xl overflow-hidden h-80 mb-8 border border-gray-200 shadow-md">
+      <MapContainer
+        center={shopLocation.position}
+        zoom={16}
+        style={{ height: "100%", width: "100%" }}
+        scrollWheelZoom={false}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={shopLocation.position}>
+          <Popup>
+            <div className="p-2 max-w-xs">
+              <h3 className="text-base font-bold text-gray-800 mb-1">
+                {shopLocation.name}
+              </h3>
+              <p className="text-sm text-gray-600">{shopLocation.address}</p>
+              <p className="text-sm text-gray-600 mt-1">{shopLocation.phone}</p>
+              <p className="text-sm text-gray-600">
+                Giờ mở cửa: {shopLocation.hours}
+              </p>
+            </div>
+          </Popup>
+        </Marker>
+      </MapContainer>
+    </div>
+  );
 
   return (
     <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50 min-h-screen">
@@ -451,22 +526,12 @@ const Contact = () => {
                   Tìm Đường Đến Quán
                 </h2>
                 <p className="text-xl text-gray-600">
-                  Chúng tôi nằm ngay trung tâm thành phố, dễ dàng di chuyển
+                  Chúng tôi nằm ở vị trí dễ tìm, thuận tiện đường đi
                 </p>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="bg-gradient-to-br from-amber-100 to-amber-200 rounded-3xl h-80 flex items-center justify-center mb-8 border border-amber-200">
-                <div className="text-center">
-                  <MapPin className="w-16 h-16 text-amber-700 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-amber-800 mb-2">
-                    Bản Đồ Quán Cà Phê
-                  </h3>
-                  <p className="text-amber-700">
-                    123 Nguyễn Huệ, Quận 1, TP.HCM
-                  </p>
-                </div>
-              </div>
+              {/* Replace this with mapSection */}
+              {mapSection}
 
               {/* Directions */}
               <div className="space-y-4">
