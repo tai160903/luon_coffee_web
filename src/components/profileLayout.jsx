@@ -23,7 +23,7 @@ export default function ProfileLayout() {
       id: "orders",
       name: "Đơn Hàng",
       icon: ShoppingBag,
-      path: "/profile/orders",
+      path: "/profile/orders-history",
     },
     { id: "rewards", name: "Tích Điểm", icon: Gift, path: "/profile/rewards" },
     {

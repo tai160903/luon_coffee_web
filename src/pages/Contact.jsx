@@ -197,7 +197,6 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      // Chuẩn bị dữ liệu theo đúng cấu trúc template
       const templateParams = {
         from_name: formData.name,
         reply_to: formData.email,
