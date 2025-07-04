@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCartInfo } from "../redux/cartSilce";
+import { setCartInfo } from "../redux/cartSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductService from "../services/product.service";

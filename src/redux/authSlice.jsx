@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import instance from "../utils/instance";
-import { clearCart } from "./cartSilce";
-import { PURGE } from "redux-persist";
+import { clearCart } from "./cartSlice";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -42,9 +41,7 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   localStorage.clear();
-  thunkAPI.dispatch(async () => {
-    await PURGE();
-  });
+  thunkAPI.dispatch(reset());
   thunkAPI.dispatch(clearCart());
   return null;
 });
@@ -65,6 +62,7 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isError = false;
       state.errorMessage = "";
+      state.tokens = null;
     },
     updateUser: (state, action) => {
       state.user = action.payload;
@@ -80,6 +78,11 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = action.payload.status === 200;
         state.user = action.payload.data?.data?.customer || null;
+        state.errorMessage = "";
+        state.tokens = {
+          accessToken: action.payload.data?.data?.accessToken || null,
+          refreshToken: action.payload.data?.data?.refreshToken || null,
+        };
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;

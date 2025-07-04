@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
-import cartReducer from "./cartSilce";
+import cartReducer from "./cartSlice";
 import {
   persistStore,
   persistReducer,

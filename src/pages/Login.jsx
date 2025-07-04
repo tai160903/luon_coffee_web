@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
 import { toast } from "react-toastify";
 import cartService from "../services/cart.service";
-import { setCartInfo } from "../redux/cartSilce";
+import { setCartInfo } from "../redux/cartSlice";
 
 const Login = () => {
   const [formData, setFormData] = useState({

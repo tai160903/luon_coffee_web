@@ -1,6 +1,6 @@
 import instance from "../utils/instance";
 import store from "../redux/store";
-import { clearCart } from "../redux/cartSilce";
+import { clearCart } from "../redux/cartSlice";
 
 const cartService = {
   addToCart: async (data) => {

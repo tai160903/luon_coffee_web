@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import cartService from "../services/cart.service";
-import { removeFromCart, setCartInfo } from "../redux/cartSilce";
+import { removeFromCart, setCartInfo } from "../redux/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 const Cart = () => {
   const dispatch = useDispatch();

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../redux/authSlice";
 import {
   Menu,
   X,
@@ -26,6 +25,7 @@ import {
   TvMinimal,
 } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
+import { clearReduxState } from "../utils/clearRedux";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,7 +125,7 @@ const Navbar = () => {
 
   // Handle logout
   const handleLogout = () => {
-    dispatch(logout());
+    clearReduxState(dispatch);
     setShowUserMenu(false);
     navigate("/");
   };

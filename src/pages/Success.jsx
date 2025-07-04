@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { clearCart } from "../redux/cartSilce";
+import { clearCart } from "../redux/cartSlice";
 import userService from "../services/user.service";
 import { updateUser } from "../redux/authSlice";
 import orderService from "../services/order.service";
