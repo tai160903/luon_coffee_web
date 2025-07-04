@@ -42,12 +42,8 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   localStorage.clear();
-  thunkAPI.dispatch({
-    type: PURGE,
-    key: "root",
-    result: () => {
-      Promise.resolve();
-    },
+  thunkAPI.dispatch(async () => {
+    await PURGE();
   });
   thunkAPI.dispatch(clearCart());
   return null;

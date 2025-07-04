@@ -138,7 +138,6 @@ function Menu() {
 
       {/* Menu Items */}
       <div className="max-w-7xl mx-auto p-6">
-        {/* Category Header with View Toggle */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center gap-4">
             {activecat && (
@@ -221,7 +220,7 @@ function Menu() {
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 flex-grow">
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 flex-grow ">
                       {item.description || "Không có mô tả"}
                     </p>
 
