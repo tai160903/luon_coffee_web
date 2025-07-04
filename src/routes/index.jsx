@@ -26,7 +26,9 @@ import NotFound from "../pages/NotFound";
 import ProfileLayout from "../components/profileLayout";
 import ProtectedRoute from "../utils/protectedRoute";
 import Location from "../pages/Location";
+import Wallet from "../pages/Wallet";
 
+const token = localStorage.getItem("token");
 const router = createBrowserRouter([
   {
     path: "/",
@@ -45,9 +47,13 @@ const router = createBrowserRouter([
         element: <Menu />,
       },
       {
+        path: "wallet",
+        element: <Wallet />,
+      },
+      {
         path: "cart",
         element: (
-          <ProtectedRoute token={localStorage.getItem("token")}>
+          <ProtectedRoute token={token}>
             <Cart />
           </ProtectedRoute>
         ),
@@ -55,7 +61,7 @@ const router = createBrowserRouter([
       {
         path: "payment",
         element: (
-          <ProtectedRoute token={localStorage.getItem("token")}>
+          <ProtectedRoute token={token}>
             <Payment />
           </ProtectedRoute>
         ),
@@ -75,7 +81,7 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: (
-          <ProtectedRoute token={localStorage.getItem("token")}>
+          <ProtectedRoute token={token}>
             <ProfileLayout />
           </ProtectedRoute>
         ),
@@ -103,7 +109,7 @@ const router = createBrowserRouter([
   {
     path: "/payment-success",
     element: (
-      <ProtectedRoute token={localStorage.getItem("token")}>
+      <ProtectedRoute token={token}>
         <SuccessPage />
       </ProtectedRoute>
     ),
@@ -111,7 +117,7 @@ const router = createBrowserRouter([
   {
     path: "/payment-cancel",
     element: (
-      <ProtectedRoute token={localStorage.getItem("token")}>
+      <ProtectedRoute token={token}>
         <FailedPage />
       </ProtectedRoute>
     ),

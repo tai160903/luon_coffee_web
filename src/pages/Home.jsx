@@ -18,6 +18,7 @@ import formatCurrency from "../utils/formatCurrency";
 
 function Home() {
   const [bestSellers, setBestSellers] = useState([]);
+
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {

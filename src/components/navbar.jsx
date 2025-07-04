@@ -20,9 +20,7 @@ import {
   Mail,
   Wallet,
   LogOut,
-  Settings,
   UserCircle,
-  Bell,
   ChevronDown,
   Users,
   TvMinimal,
@@ -200,7 +198,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               {/* Wallet - Only show if authenticated and user exists in localStorage */}
               {isAuthenticated && localUser && (
-                <div
+                <Link
                   to="/wallet"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 border border-gray-200 hover:border-green-200"
                 >
@@ -208,7 +206,7 @@ const Navbar = () => {
                   <span className="text-sm font-medium">
                     {formatCurrency(walletBalance)}
                   </span>
-                </div>
+                </Link>
               )}
 
               {/* Cart - Only show if authenticated and user exists in localStorage */}
@@ -305,24 +303,6 @@ const Navbar = () => {
                         >
                           <ShoppingCart className="w-5 h-5" />
                           <span>Đơn Hàng</span>
-                        </Link>
-
-                        <Link
-                          to="/notifications"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          <Bell className="w-5 h-5" />
-                          <span>Thông Báo</span>
-                        </Link>
-
-                        <Link
-                          to="/settings"
-                          onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          <Settings className="w-5 h-5" />
-                          <span>Cài Đặt</span>
                         </Link>
                       </div>
 

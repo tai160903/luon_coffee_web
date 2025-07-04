@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Coffee, ArrowRight, Loader } from "lucide-react";
+import { Coffee, ArrowRight, Loader, Grid, List } from "lucide-react";
 import ProductService from "../services/product.service";
 import categoryService from "../services/category.service";
 import formatCurrency from "../utils/formatCurrency";
@@ -12,6 +12,7 @@ function Menu() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("grid");
   const customer = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
@@ -137,73 +138,157 @@ function Menu() {
 
       {/* Menu Items */}
       <div className="max-w-7xl mx-auto p-6">
-        {/* Category Header */}
-        <div className="flex items-center gap-4 mb-8">
-          {activecat && (
-            <>
-              <div
-                className={`w-12 h-12 bg-gradient-to-r ${activecat.color} rounded-2xl flex items-center justify-center`}
-              >
-                <activecat.icon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800">
-                  {activecat.name}
-                </h2>
-                <p className="text-gray-600">
-                  {filteredItems.length} món có sẵn
-                </p>
-              </div>
-            </>
-          )}
+        {/* Category Header with View Toggle */}
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            {activecat && (
+              <>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-r ${activecat.color} rounded-2xl flex items-center justify-center`}
+                >
+                  <activecat.icon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">
+                    {activecat.name}
+                  </h2>
+                  <p className="text-gray-600">
+                    {filteredItems.length} món có sẵn
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* View Toggle Switch */}
+          <div className="flex items-center bg-white rounded-full p-1 shadow-md border border-gray-100">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                viewMode === "grid"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow"
+                  : "text-gray-700 hover:bg-amber-50"
+              }`}
+            >
+              <Grid size={18} />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                viewMode === "list"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow"
+                  : "text-gray-700 hover:bg-amber-50"
+              }`}
+            >
+              <List size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredItems?.map((item) => (
-            <Link
-              to={`/details/${item.id}`}
-              key={item.id}
-              className="group block transform hover:scale-105 transition-all duration-300"
-            >
-              <div className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 group-hover:border-amber-200">
-                {/* Image */}
-                <div className="relative h-48 bg-gradient-to-br from-amber-100 to-amber-200 overflow-hidden">
-                  <img
-                    src={item.image || "/placeholder.svg"}
-                    alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-amber-700 transition-colors">
-                        {item.name}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-amber-700">
-                        {formatCurrency(item.price)}
-                      </span>
-                    </div>
+        {viewMode === "grid" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredItems?.map((item) => (
+              <Link
+                to={`/details/${item.id}`}
+                key={item.id}
+                className="group block transform hover:scale-105 transition-all duration-300"
+              >
+                <div className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 group-hover:border-amber-200 h-[380px] flex flex-col">
+                  {/* Image */}
+                  <div className="relative h-48 bg-gradient-to-br from-amber-100 to-amber-200 overflow-hidden flex-shrink-0">
+                    <img
+                      src={item.image || "/placeholder.svg"}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.target.src = "/placeholder.svg";
+                      }}
+                    />
                   </div>
 
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-2">
-                    {item.description}
-                  </p>
-                  {customer && (
-                    <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center gap-2">
-                      Đặt Món
-                    </button>
-                  )}
+                  {/* Content */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-amber-700 transition-colors line-clamp-1">
+                          {item.name}
+                        </h3>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-amber-700">
+                          {formatCurrency(item.price)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 flex-grow">
+                      {item.description || "Không có mô tả"}
+                    </p>
+
+                    {customer && (
+                      <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center gap-2 mt-auto">
+                        Đặt Món
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* List View */}
+        {viewMode === "list" && (
+          <div className="flex flex-col gap-4">
+            {filteredItems?.map((item) => (
+              <Link
+                to={`/details/${item.id}`}
+                key={item.id}
+                className="group block"
+              >
+                <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group-hover:border-amber-200">
+                  <div className="flex flex-col sm:flex-row">
+                    {/* Image */}
+                    <div className="relative h-48 sm:h-auto sm:w-48 bg-gradient-to-br from-amber-100 to-amber-200 overflow-hidden">
+                      <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.src = "/placeholder.svg";
+                        }}
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                        <h3 className="text-xl font-bold text-gray-800 group-hover:text-amber-700 transition-colors">
+                          {item.name}
+                        </h3>
+                        <span className="text-2xl font-bold text-amber-700">
+                          {formatCurrency(item.price)}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        {item.description || "Không có mô tả"}
+                      </p>
+
+                      {customer && (
+                        <div className="mt-auto text-right">
+                          <button className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-2 px-6 rounded-xl transition-all duration-300 group-hover:scale-105">
+                            Đặt Món
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
         {filteredItems.length === 0 && (

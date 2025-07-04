@@ -224,6 +224,8 @@ const cartSlice = createSlice({
 
     // Clear entire cart
     clearCart: (state) => {
+      state.id = null;
+      state.customerId = null;
       state.cartItems = [];
       state.totalQuantity = 0;
       state.totalAmount = 0;
@@ -292,10 +294,9 @@ const cartSlice = createSlice({
         if (payload.discount) state.discount = payload.discount;
         if (payload.finalTotal) state.finalTotal = payload.finalTotal;
       } else {
-        // fallback: empty cart
-        state.cartItems = [];
         state.id = null;
         state.customerId = null;
+        state.cartItems = [];
         state.totalAmount = 0;
         state.totalQuantity = 0;
         state.discount = null;

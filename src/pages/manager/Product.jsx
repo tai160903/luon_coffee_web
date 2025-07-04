@@ -10,6 +10,7 @@ import {
   FaTags,
   FaExclamationTriangle,
   FaStar,
+  FaCloudUploadAlt,
 } from "react-icons/fa";
 import ProductService from "../../services/product.service";
 import { Loader } from "lucide-react";
@@ -17,6 +18,7 @@ import formatCurrency from "../../utils/formatCurrency";
 import catagoryService from "../../services/category.service";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CloudinaryService from "../../services/cloudinary.service";
 
 const Product = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -35,6 +37,8 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState("");
   const [imagePreview, setImagePreview] = useState("");
+  const [cloudinaryPublicId, setCloudinaryPublicId] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return null;
@@ -128,15 +132,11 @@ const Product = () => {
     const categoryIdInput = document.getElementById("categoryId").value;
 
     const errors = [];
-
-    // Name validations
     if (!nameInput) {
       errors.push("Tên sản phẩm không được để trống");
     } else if (nameInput.length > 100) {
       errors.push("Tên sản phẩm không được vượt quá 100 ký tự");
     }
-
-    // Price validations
     if (!priceInput) {
       errors.push("Giá sản phẩm không được để trống");
     } else {
@@ -146,16 +146,12 @@ const Product = () => {
       } else if (price <= 0) {
         errors.push("Giá sản phẩm phải lớn hơn 0");
       } else if (price > 1000000) {
-        // 1 million VND limit example
         errors.push("Giá sản phẩm quá cao, vui lòng kiểm tra lại");
       }
     }
-
-    // Category validations
     if (!categoryIdInput) {
       errors.push("Vui lòng chọn danh mục");
     }
-
     return {
       isValid: errors.length === 0,
       errors: errors,
@@ -166,12 +162,10 @@ const Product = () => {
     const validation = validateProductForm();
 
     if (!validation.isValid) {
-      // Show all errors as toast
       validation.errors.forEach((error) => toast.error(error));
       return;
     }
 
-    // Get input values
     const nameInput = document.getElementById("name").value;
     const descriptionInput = document.getElementById("description").value;
     const priceInput = document.getElementById("price").value;
@@ -180,7 +174,6 @@ const Product = () => {
     setLoading(true);
 
     try {
-      // Apply capitalization to product name
       const formattedName = capitalizeWords(nameInput.trim());
 
       const productData = {
@@ -205,7 +198,13 @@ const Product = () => {
           setProducts(
             products.map((p) =>
               p.id === editingProduct.id
-                ? { ...p, ...productData, image: imageUrl || p.image }
+                ? {
+                    ...p,
+                    ...productData,
+                    image: imageUrl || p.image,
+                    cloudinaryPublicId:
+                      cloudinaryPublicId || p.cloudinaryPublicId,
+                  }
                 : p
             )
           );
@@ -228,21 +227,13 @@ const Product = () => {
       setEditingProduct(null);
       setImageUrl("");
       setImagePreview("");
+      setCloudinaryPublicId("");
     } catch (error) {
       console.error("Error saving product:", error);
       toast.error(`Lỗi: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  };
-
-  const convertFileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const handleImageUpload = async (e) => {
@@ -254,20 +245,26 @@ const Product = () => {
           return;
         }
 
-        if (file.size > 2 * 1024 * 1024) {
+        if (file.size > 5 * 1024 * 1024) {
           toast.error(
-            "Kích thước hình ảnh quá lớn. Vui lòng chọn hình dưới 2MB"
+            "Kích thước hình ảnh quá lớn. Vui lòng chọn hình dưới 5MB"
           );
           return;
         }
 
-        const base64String = await convertFileToBase64(file);
-
-        setImageUrl(base64String);
-        setImagePreview(base64String);
+        setUploadingImage(true);
+        const tempPreview = URL.createObjectURL(file);
+        setImagePreview(tempPreview);
+        const response = await CloudinaryService(file);
+        setImageUrl(response.secure_url);
+        setCloudinaryPublicId(response.public_id);
+        toast.success("Hình ảnh đã được tải lên thành công!");
       } catch (error) {
-        console.error("Error converting image to base64:", error);
-        toast.error("Có lỗi khi xử lý hình ảnh. Vui lòng thử lại.");
+        console.error("Error uploading image:", error);
+        toast.error("Có lỗi khi tải lên hình ảnh. Vui lòng thử lại.");
+        setImagePreview("");
+      } finally {
+        setUploadingImage(false);
       }
     }
   };
@@ -284,10 +281,8 @@ const Product = () => {
     try {
       setLoading(true);
 
-      // Normally you would call your API here
       // const response = await ProductService.deleteProduct(productId);
 
-      // For now, just update the UI
       setProducts(products.filter((product) => product.id !== productId));
       setSelectedProducts(selectedProducts.filter((id) => id !== productId));
       toast.success("Xóa sản phẩm thành công!");
@@ -304,10 +299,6 @@ const Product = () => {
     try {
       setLoading(true);
 
-      // Normally you would call your API here
-      // For bulk delete or loop through each product
-
-      // For now, just update the UI
       setProducts(
         products.filter((product) => !selectedProducts.includes(product.id))
       );
@@ -648,8 +639,9 @@ const Product = () => {
                         <label className="block text-sm font-medium text-gray-700">
                           Hình Ảnh Sản Phẩm
                         </label>
-                        <div className="mt-1 flex flex-col space-y-2">
-                          <div className="h-32 w-32 rounded overflow-hidden bg-gray-100">
+                        <div className="mt-1 flex flex-col space-y-4">
+                          {/* Image Preview */}
+                          <div className="h-40 w-40 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
                             {editingProduct?.image || imagePreview ? (
                               <img
                                 src={imagePreview || editingProduct?.image}
@@ -658,33 +650,62 @@ const Product = () => {
                               />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-gray-400">
-                                No image
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-12 w-12"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={1}
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                            {uploadingImage && (
+                              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <Loader className="w-8 h-8 text-white animate-spin" />
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center">
+
+                          {/* Cloudinary Upload */}
+                          <div>
+                            <label
+                              htmlFor="cloudinary-upload"
+                              className={`
+          cursor-pointer flex items-center justify-center gap-2 py-2 px-3 border border-gray-300 rounded-md 
+          ${
+            uploadingImage
+              ? "bg-gray-100 text-gray-400"
+              : "bg-white text-gray-700 hover:bg-gray-50"
+          }
+          transition-colors duration-200
+        `}
+                              disabled={uploadingImage}
+                            >
+                              <FaCloudUploadAlt className="text-[#8B4513] text-xl" />
+                              <span>
+                                {uploadingImage
+                                  ? "Đang tải lên..."
+                                  : "Tải lên từ máy tính"}
+                              </span>
+                            </label>
                             <input
-                              type="text"
-                              name="imageUrl"
-                              placeholder="URL hình ảnh"
-                              className="flex-1 border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
-                              value={imageUrl}
-                              onChange={(e) => {
-                                setImageUrl(e.target.value);
-                                setImagePreview(e.target.value);
-                              }}
-                            />
-                            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                              URL
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <input
+                              id="cloudinary-upload"
                               type="file"
                               accept="image/*"
                               onChange={handleImageUpload}
-                              className="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#8B4513] focus:border-[#8B4513]"
+                              className="sr-only" // Hidden input
+                              disabled={uploadingImage}
                             />
+                            <p className="mt-1 text-xs text-gray-500">
+                              Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -708,6 +729,7 @@ const Product = () => {
                         setEditingProduct(null);
                         setImageUrl("");
                         setImagePreview("");
+                        setCloudinaryPublicId("");
                       }}
                     >
                       Hủy
@@ -718,7 +740,6 @@ const Product = () => {
             </div>
           )}
 
-          {/* Delete Confirmation Modal */}
           {deleteConfirmProduct && (
             <div className="fixed z-50 inset-0 overflow-y-auto">
               <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

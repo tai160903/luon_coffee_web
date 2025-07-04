@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { jwtDecode } from "jwt-decode";
 
 const ProtectedRoute = ({ token, requiredRole, children }) => {
+  console.log("ProtectedRoute initialized with token:", token);
   if (!token) {
     return <Navigate to="/login" replace />;
   }
@@ -13,7 +14,6 @@ const ProtectedRoute = ({ token, requiredRole, children }) => {
       decodedToken[
         "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
       ];
-
     if (requiredRole && !requiredRole.includes(userRole)) {
       return <Navigate to="*" replace />;
     }

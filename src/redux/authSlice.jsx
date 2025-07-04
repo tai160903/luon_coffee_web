@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import instance from "../utils/instance";
+import { clearCart } from "./cartSilce";
+import { PURGE } from "redux-persist";
 
 const user = JSON.parse(localStorage.getItem("user"));
 
@@ -40,7 +42,15 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   localStorage.clear();
-  thunkAPI.dispatch({ type: "cart/clearCart" });
+  thunkAPI.dispatch({
+    type: PURGE,
+    key: "root",
+    result: () => {
+      Promise.resolve();
+    },
+  });
+  thunkAPI.dispatch(clearCart());
+  return null;
 });
 
 const initialState = {
@@ -83,7 +93,6 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
       })
 
-      // Logout case
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
