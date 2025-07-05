@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Menu,
   X,
@@ -24,46 +22,22 @@ import {
   Users,
   TvMinimal,
 } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
-import { clearReduxState } from "../utils/clearRedux";
+import { logout } from "../redux/slices/authSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [localUser, setLocalUser] = useState(null);
   const location = useLocation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setLocalUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const walletBalance = user?.wallet ?? localUser?.wallet ?? 0;
+  const { user, isAuthenticated, role } = useSelector((state) => state.auth);
+  const walletBalance = user?.wallet ?? 0;
 
   const cartItems = useSelector((state) => state.cart.cartItems);
   const cartCount = cartItems?.length || 0;
-
-  const token = localStorage.getItem("token");
-  let role = null;
-  if (token) {
-    try {
-      const decodedToken = jwtDecode(token);
-
-      role =
-        decodedToken[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-        ];
-    } catch (error) {
-      console.error("Invalid token format", error);
-    }
-  }
 
   const getUserDisplayName = () => {
     if (user?.fullName) return user.fullName;
@@ -123,9 +97,8 @@ const Navbar = () => {
     }).format(amount);
   };
 
-  // Handle logout
   const handleLogout = () => {
-    clearReduxState(dispatch);
+    dispatch(logout());
     setShowUserMenu(false);
     navigate("/");
   };
@@ -194,10 +167,8 @@ const Navbar = () => {
               })}
             </div>
 
-            {/* Right Side Actions */}
             <div className="flex items-center gap-3">
-              {/* Wallet - Only show if authenticated and user exists in localStorage */}
-              {isAuthenticated && localUser && (
+              {isAuthenticated && role && (
                 <Link
                   to="/wallet"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 border border-gray-200 hover:border-green-200"
@@ -209,8 +180,7 @@ const Navbar = () => {
                 </Link>
               )}
 
-              {/* Cart - Only show if authenticated and user exists in localStorage */}
-              {isAuthenticated && localUser && (
+              {isAuthenticated && role && (
                 <Link
                   to="/cart"
                   className="p-3 text-gray-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all duration-300 relative"

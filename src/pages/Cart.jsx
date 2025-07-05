@@ -17,8 +17,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import cartService from "../services/cart.service";
-import { removeFromCart, setCartInfo } from "../redux/cartSlice";
+import { removeFromCart, setCartInfo } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
+import { setCheckoutData } from "../redux/slices/orderSlice";
 const Cart = () => {
   const dispatch = useDispatch();
   const [cartItems, setCartItems] = useState([]);
@@ -232,7 +233,7 @@ const Cart = () => {
           : "",
       promoCode: promoApplied ? "WELCOME10" : null,
     };
-    localStorage.setItem("orderData", JSON.stringify(orderData));
+    dispatch(setCheckoutData(orderData));
   };
 
   if (isLoading) {

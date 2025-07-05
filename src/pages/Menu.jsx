@@ -6,6 +6,7 @@ import { Coffee, ArrowRight, Loader, Grid, List } from "lucide-react";
 import ProductService from "../services/product.service";
 import categoryService from "../services/category.service";
 import formatCurrency from "../utils/formatCurrency";
+import { useSelector } from "react-redux";
 
 function Menu() {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -13,7 +14,7 @@ function Menu() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-  const customer = JSON.parse(localStorage.getItem("user"));
+  const customer = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     fetchCategoriesAndProducts();

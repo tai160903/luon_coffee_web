@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCartInfo } from "../redux/cartSlice";
+import { setCartInfo } from "../redux/slices/cartSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductService from "../services/product.service";
@@ -21,7 +21,7 @@ import cartService from "../services/cart.service";
 const Detail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const [product, setProduct] = useState(null);
   const [sizes, setSizes] = useState([]);
@@ -32,7 +32,6 @@ const Detail = () => {
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
-  const customer = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     if (id) {
@@ -266,7 +265,7 @@ const Detail = () => {
               </div>
             </div>
 
-            {customer && (
+            {user && (
               <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                   <div>

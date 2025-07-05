@@ -1,20 +1,17 @@
 import { Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
-import { jwtDecode } from "jwt-decode";
+import { useSelector } from "react-redux";
 
-const ProtectedRoute = ({ token, requiredRole, children }) => {
-  console.log("ProtectedRoute initialized with token:", token);
+const ProtectedRoute = ({ requiredRole, children }) => {
+  const token = useSelector((state) => state.auth.tokens?.accessToken);
+  console.log("token", token);
+  const role = useSelector((state) => state.auth.role);
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
   try {
-    const decodedToken = jwtDecode(token);
-    const userRole =
-      decodedToken[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-      ];
-    if (requiredRole && !requiredRole.includes(userRole)) {
+    if (requiredRole && !requiredRole.includes(role)) {
       return <Navigate to="*" replace />;
     }
   } catch (error) {

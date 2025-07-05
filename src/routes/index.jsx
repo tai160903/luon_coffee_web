@@ -28,7 +28,6 @@ import ProtectedRoute from "../utils/protectedRoute";
 import Location from "../pages/Location";
 import Wallet from "../pages/Wallet";
 
-const token = localStorage.getItem("token");
 const router = createBrowserRouter([
   {
     path: "/",
@@ -53,7 +52,7 @@ const router = createBrowserRouter([
       {
         path: "cart",
         element: (
-          <ProtectedRoute token={token}>
+          <ProtectedRoute>
             <Cart />
           </ProtectedRoute>
         ),
@@ -61,7 +60,7 @@ const router = createBrowserRouter([
       {
         path: "payment",
         element: (
-          <ProtectedRoute token={token}>
+          <ProtectedRoute>
             <Payment />
           </ProtectedRoute>
         ),
@@ -81,7 +80,7 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: (
-          <ProtectedRoute token={token}>
+          <ProtectedRoute>
             <ProfileLayout />
           </ProtectedRoute>
         ),
@@ -109,7 +108,7 @@ const router = createBrowserRouter([
   {
     path: "/payment-success",
     element: (
-      <ProtectedRoute token={token}>
+      <ProtectedRoute>
         <SuccessPage />
       </ProtectedRoute>
     ),
@@ -117,7 +116,7 @@ const router = createBrowserRouter([
   {
     path: "/payment-cancel",
     element: (
-      <ProtectedRoute token={token}>
+      <ProtectedRoute>
         <FailedPage />
       </ProtectedRoute>
     ),
@@ -125,10 +124,7 @@ const router = createBrowserRouter([
   {
     path: "/manager",
     element: (
-      <ProtectedRoute
-        token={localStorage.getItem("token")}
-        requiredRole="ADMIN"
-      >
+      <ProtectedRoute requiredRole="ADMIN">
         <ManagerLayout />
       </ProtectedRoute>
     ),
@@ -158,10 +154,7 @@ const router = createBrowserRouter([
   {
     path: "/pos",
     element: (
-      <ProtectedRoute
-        token={localStorage.getItem("token")}
-        requiredRole={["STAFF", "ADMIN"]}
-      >
+      <ProtectedRoute requiredRole={["STAFF", "ADMIN"]}>
         <POSLayout />
       </ProtectedRoute>
     ),

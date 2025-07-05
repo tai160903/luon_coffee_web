@@ -1,31 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-// Helper function to save cart to localStorage
-const saveCartToStorage = (cartItems) => {
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
-    } catch (error) {
-      console.error("Error saving cart to localStorage:", error);
-    }
-  }
-};
-
-// Helper function to load cart from localStorage
-const loadCartFromStorage = () => {
-  if (typeof window !== "undefined") {
-    try {
-      const data = localStorage.getItem("cart");
-      return data ? JSON.parse(data) : [];
-    } catch (error) {
-      console.error("Error loading cart from localStorage:", error);
-      return [];
-    }
-  }
-  return [];
-};
-
-// Initial state
 const initialState = {
   id: null,
   customerId: null,
@@ -119,9 +92,6 @@ const cartSlice = createSlice({
       state.totalQuantity = totals.quantity;
       state.totalAmount = totals.amount;
       state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-
-      // Save to localStorage
-      saveCartToStorage(state.cartItems);
     },
 
     // Remove item from cart
@@ -134,9 +104,6 @@ const cartSlice = createSlice({
       state.totalQuantity = totals.quantity;
       state.totalAmount = totals.amount;
       state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-
-      // Save to localStorage
-      saveCartToStorage(state.cartItems);
     },
 
     // Update item quantity
@@ -153,7 +120,6 @@ const cartSlice = createSlice({
         state.totalQuantity = totals.quantity;
         state.totalAmount = totals.amount;
         state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-        saveCartToStorage(state.cartItems);
       }
     },
 
@@ -177,9 +143,6 @@ const cartSlice = createSlice({
         state.totalQuantity = totals.quantity;
         state.totalAmount = totals.amount;
         state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-
-        // Save to localStorage
-        saveCartToStorage(state.cartItems);
       }
     },
 
@@ -216,9 +179,6 @@ const cartSlice = createSlice({
         state.totalQuantity = totals.quantity;
         state.totalAmount = totals.amount;
         state.finalTotal = state.totalAmount - (state.discount?.value || 0);
-
-        // Save to localStorage
-        saveCartToStorage(state.cartItems);
       }
     },
 
@@ -231,9 +191,6 @@ const cartSlice = createSlice({
       state.totalAmount = 0;
       state.finalTotal = 0;
       state.discount = null;
-
-      // Save to localStorage
-      saveCartToStorage([]);
     },
 
     // Apply discount to cart (for promotional codes)
@@ -270,19 +227,14 @@ const cartSlice = createSlice({
       state.finalTotal = state.totalAmount;
     },
 
-    // Initialize cart from localStorage or reset it
     initializeCart: (state) => {
-      const items = loadCartFromStorage();
-      state.cartItems = items;
-
-      // Calculate totals
-      const totals = calculateCartTotals(items);
-      state.totalQuantity = totals.quantity;
-      state.totalAmount = totals.amount;
-      state.finalTotal = state.totalAmount - (state.discount?.value || 0);
+      state.cartItems = [];
+      state.totalQuantity = 0;
+      state.totalAmount = 0;
+      state.finalTotal = 0;
+      state.discount = null;
     },
 
-    // Set cart info from API or backend (overwrite all cart data)
     setCartInfo: (state, action) => {
       const payload = action.payload;
       if (Array.isArray(payload.cartItems)) {
@@ -302,9 +254,6 @@ const cartSlice = createSlice({
         state.discount = null;
         state.finalTotal = 0;
       }
-
-      // Save to localStorage
-      saveCartToStorage(state.cartItems);
     },
   },
 });

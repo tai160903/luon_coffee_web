@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Coffee, User, Lock, ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { login } from "../redux/authSlice";
+import { login } from "../redux/slices/authSlice";
 import { toast } from "react-toastify";
 import cartService from "../services/cart.service";
-import { setCartInfo } from "../redux/cartSlice";
+import { setCartInfo } from "../redux/slices/cartSlice";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -80,7 +80,7 @@ const Login = () => {
             theme: "colored",
           });
         }
-        toast.success("Đăng nhập thành công!", { theme: "colored" });
+        toast.success("Đăng nhập thành công!");
         setTimeout(() => navigate("/menu", { replace: true }), 500);
       } else {
         throw new Error(resultAction.payload);

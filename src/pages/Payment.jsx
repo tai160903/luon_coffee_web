@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
@@ -17,9 +17,12 @@ import paymentService from "../services/payment.service"; // Change from orderSe
 import formatCurrency from "../utils/formatCurrency";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCheckoutData, setCheckoutData } from "../redux/slices/orderSlice";
 
 const Payment = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [paymentMethod, setPaymentMethod] = useState("wallet");
   const [customerInfo, setCustomerInfo] = useState({
     fullName: "",
@@ -27,42 +30,9 @@ const Payment = () => {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
-  const [orderData, setOrderData] = useState({
-    items: [],
-    subtotal: 0,
-    discount: 0,
-    total: 0,
-    pickupTime: "",
-    orderNotes: "",
-  });
 
-  // Lấy dữ liệu order từ localStorage khi mount
-  useEffect(() => {
-    const localOrder = localStorage.getItem("orderData");
-    if (localOrder) {
-      try {
-        const parsed = JSON.parse(localOrder);
-        setOrderData({
-          items: parsed.items || [],
-          subtotal: parsed.subtotal || 0,
-          discount: parsed.discount || 0,
-          total: parsed.total || 0,
-          pickupTime: parsed.pickupTime || "",
-          orderNotes: parsed.orderNotes || "",
-        });
-      } catch {
-        // fallback nếu lỗi parse
-        setOrderData({
-          items: [],
-          subtotal: 0,
-          discount: 0,
-          total: 0,
-          pickupTime: "",
-          orderNotes: "",
-        });
-      }
-    }
-  }, []);
+  // Lấy orderData trực tiếp từ Redux
+  const orderData = useSelector((state) => state.order.checkoutData);
 
   const paymentMethods = [
     {
@@ -122,14 +92,13 @@ const Payment = () => {
       if (paymentMethod === "wallet") {
         response = await paymentService.payWithWallet(payload);
         if (response.status === 200) {
-          localStorage.removeItem("orderData");
-          localStorage.setItem("orderData", JSON.stringify(response.data.data));
+          dispatch(setCheckoutData(response.data.data));
           navigate("/payment-success");
         }
       } else if (paymentMethod === "payos") {
         response = await paymentService.payWithPayOS(payload);
         if (response.status === 200) {
-          localStorage.removeItem("orderData");
+          dispatch(clearCheckoutData());
           window.location.replace(response.data.paymentUrl);
         }
       }

@@ -13,10 +13,10 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { clearCart } from "../redux/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "../redux/slices/cartSlice";
 import userService from "../services/user.service";
-import { updateUser } from "../redux/authSlice";
+import { updateUser } from "../redux/slices/authSlice";
 import orderService from "../services/order.service";
 
 export default function SuccessPage() {
@@ -32,8 +32,8 @@ export default function SuccessPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const stored = useSelector((state) => state.order.checkoutData);
   useEffect(() => {
-    const stored = localStorage.getItem("orderData");
     if (stored) {
       try {
         setOrderData(JSON.parse(stored));
@@ -61,7 +61,6 @@ export default function SuccessPage() {
       try {
         const res = await userService.getProfile();
         dispatch(updateUser(res.data.data));
-        localStorage.setItem("user", JSON.stringify(res.data.data));
       } catch (e) {
         console.error("Failed to fetch user profile:", e.message);
       }

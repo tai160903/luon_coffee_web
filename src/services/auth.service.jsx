@@ -1,9 +1,12 @@
 import instance from "../utils/instance";
 
 const authService = {
-  login: async (credentials) => {
-    const response = await instance.post("/User/login-customer", credentials);
-    return response.data;
+  login: async (username, password) => {
+    const response = await instance.post("/User/login", {
+      username,
+      password,
+    });
+    return response;
   },
 
   register: async (userData) => {

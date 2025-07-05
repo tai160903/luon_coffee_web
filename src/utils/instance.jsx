@@ -1,4 +1,11 @@
 import axios from "axios";
+import { updateTokens } from "../redux/slices/authSlice";
+import { useSelector } from "react-redux";
+
+let store;
+export const setStore = (_store) => {
+  store = _store;
+};
 
 // Create the main axios instance
 const instance = axios.create({
@@ -20,55 +27,51 @@ const refreshInstance = axios.create({
   },
 });
 
-// Variable to track if a token refresh is already in progress
 let isRefreshing = false;
-// Queue of requests that arrived while refreshing token
 let refreshSubscribers = [];
 
-// Function to subscribe requests to the token refresh
 const subscribeTokenRefresh = (callback) => {
   refreshSubscribers.push(callback);
 };
 
-// Function to execute all queued requests after token refresh
 const onTokenRefreshed = (newToken) => {
   refreshSubscribers.forEach((callback) => callback(newToken));
   refreshSubscribers = [];
 };
 
-// Function to refresh the token
 const refreshAuthToken = async () => {
   try {
-    // Get current refresh token
-    const refreshToken = localStorage.getItem("refreshToken");
+    const refreshToken = store.getState()?.auth?.tokens?.refreshToken;
+
+    console.log("Refreshing token with refreshToken:", refreshToken);
 
     if (!refreshToken) {
-      // If no refresh token, force logout
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
       window.location.href = "/login";
       return null;
     }
 
-    // Call refresh token API
     const response = await refreshInstance.post("/User/refresh-token", {
       refreshToken: refreshToken,
     });
+    console.log("Token refresh response:", response);
 
-    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    const { accessToken, refreshToken: newRefreshToken } =
+      response.data.data || response.data;
 
-    // Update storage with new tokens
-    localStorage.setItem("token", accessToken);
-    localStorage.setItem("refreshToken", newRefreshToken);
+    console.log("New tokens received:", {
+      accessToken: accessToken,
+      newRefreshToken: newRefreshToken,
+    });
+    store.dispatch(
+      updateTokens({
+        accessToken: accessToken,
+        refreshToken: newRefreshToken,
+      })
+    );
 
     return accessToken;
   } catch (error) {
-    console.error("Failed to refresh token:", error);
-    // Force logout on refresh failure
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
+    console.error("Failed to refresh token:" + error.message);
     return null;
   }
 };
@@ -76,10 +79,8 @@ const refreshAuthToken = async () => {
 // Add a request interceptor
 instance.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem("token");
+    const token = store.getState()?.auth?.tokens?.accessToken;
 
-    // If token exists, add to headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -99,7 +100,6 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If the error is 401 and we haven't already tried to refresh the token
     if (
       error.response &&
       error.response.status === 401 &&
@@ -139,12 +139,6 @@ instance.interceptors.response.use(
         }
       } catch (refreshError) {
         isRefreshing = false;
-        // Remove tokens on refresh failure
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-
-        // Redirect to login page
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
