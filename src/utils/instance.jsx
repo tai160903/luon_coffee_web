@@ -1,6 +1,5 @@
 import axios from "axios";
 import { updateTokens } from "../redux/slices/authSlice";
-import { useSelector } from "react-redux";
 
 let store;
 export const setStore = (_store) => {

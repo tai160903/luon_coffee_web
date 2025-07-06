@@ -56,7 +56,8 @@ const Product = () => {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const response = await ProductService.getProducts();
+    const response = await ProductService.getAllProducts();
+
     if (response && Array.isArray(response.data)) {
       setProducts(response.data);
     }
@@ -314,6 +315,37 @@ const Product = () => {
     }
   };
 
+  const handleToggleAvailable = async (productId) => {
+    try {
+      setLoading(true);
+      const product = products.find((p) => p.id === productId);
+      if (!product) throw new Error("Sản phẩm không tồn tại");
+
+      const updatedProduct = {
+        ...product,
+        isAvaillable: !product.isAvaillable,
+      };
+
+      const response = await ProductService.updateAvailable(productId);
+
+      if (response) {
+        setProducts((prevProducts) =>
+          prevProducts.map((p) => (p.id === productId ? updatedProduct : p))
+        );
+        toast.success(
+          `Đã ${product.isAvaillable ? "vô hiệu hóa" : "kích hoạt"} sản phẩm`
+        );
+      } else {
+        throw new Error("Không thể cập nhật trạng thái sản phẩm");
+      }
+    } catch (error) {
+      console.error("Error toggling product availability:", error);
+      toast.error(`Lỗi: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="px-1">
       {loading ? (
@@ -432,6 +464,16 @@ const Product = () => {
                     <th
                       scope="col"
                       className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort("available")}
+                    >
+                      <div className="flex items-center">
+                        Có Sẵn
+                        {getSortIndicator("available")}
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                       onClick={() => requestSort("description")}
                     >
                       <div className="flex items-center">
@@ -508,6 +550,14 @@ const Product = () => {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(product.price)}
                       </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <input
+                          type="checkbox"
+                          checked={product.isAvaillable}
+                          onChange={() => handleToggleAvailable(product.id)}
+                          className="h-4 w-4 text-[#8B4513] border-gray-300 rounded focus:ring-[#8B4513]"
+                        />
+                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate">
                         {product.description}
                       </td>
@@ -541,7 +591,6 @@ const Product = () => {
             </div>
           </div>
 
-          {/* Add/Edit Product Modal */}
           {(showAddModal || editingProduct) && (
             <div className="fixed z-50 inset-0 overflow-y-auto">
               <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

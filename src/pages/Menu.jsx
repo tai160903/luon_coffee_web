@@ -7,6 +7,7 @@ import ProductService from "../services/product.service";
 import categoryService from "../services/category.service";
 import formatCurrency from "../utils/formatCurrency";
 import { useSelector } from "react-redux";
+import ReactPaginate from "react-paginate";
 
 function Menu() {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -14,18 +15,24 @@ function Menu() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const customer = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    fetchCategoriesAndProducts();
-  }, []);
+    fetchCategoriesAndProducts(currentPage, activeCategory);
+  }, [activeCategory, currentPage]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory]);
 
-  const fetchCategoriesAndProducts = async () => {
+  const fetchCategoriesAndProducts = async (
+    page = 1,
+    categoryId = activeCategory
+  ) => {
     setIsLoading(true);
     try {
-      // Gọi API lấy danh mục
       const categoryRes = await categoryService.getAll();
-      // Thêm mục "Tất cả"
       const allCategory = {
         id: "all",
         name: "Tất Cả",
@@ -36,18 +43,23 @@ function Menu() {
         allCategory,
         ...(categoryRes.data || []).map((cat) => ({
           ...cat,
-          icon: Coffee, // hoặc chọn icon phù hợp theo cat
-          color: "from-amber-500 to-amber-600", // hoặc màu theo cat
+          icon: Coffee,
+          color: "from-amber-500 to-amber-600",
         })),
       ]);
 
-      // Gọi API lấy sản phẩm
-      const response = await ProductService.getProducts();
-      setProducts(response.data);
+      // Gọi API lấy sản phẩm theo trang và danh mục
+      const params = { page };
+      if (categoryId !== "all") params.categoryId = categoryId;
+      const response = await ProductService.getProducts(params);
+      setProducts(response.data.items || []);
+      setCurrentPage(response.data.currentPage || 1);
+      setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching data:", error.message);
       setCategories([]);
       setProducts([]);
+      setTotalPages(1);
     }
     setIsLoading(false);
   };
@@ -221,7 +233,7 @@ function Menu() {
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 flex-grow ">
+                    <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3 flex-grow truncate">
                       {item.description || "Không có mô tả"}
                     </p>
 
@@ -287,6 +299,38 @@ function Menu() {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-10">
+            <ReactPaginate
+              previousLabel={"<"}
+              nextLabel={">"}
+              breakLabel={"..."}
+              breakClassName={"px-2"}
+              pageCount={totalPages}
+              forcePage={currentPage - 1}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={3}
+              onPageChange={(selectedItem) =>
+                setCurrentPage(selectedItem.selected + 1)
+              }
+              containerClassName={"inline-flex rounded-md shadow-sm"}
+              pageClassName={
+                "px-4 py-2 border-t border-b border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+              }
+              pageLinkClassName={""}
+              previousClassName={
+                "px-4 py-2 rounded-l-md border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+              }
+              nextClassName={
+                "px-4 py-2 rounded-r-md border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+              }
+              activeClassName={"bg-amber-500 text-white font-bold"}
+              disabledClassName={"opacity-50 cursor-not-allowed"}
+            />
           </div>
         )}
 

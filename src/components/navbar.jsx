@@ -23,6 +23,7 @@ import {
   TvMinimal,
 } from "lucide-react";
 import { logout } from "../redux/slices/authSlice";
+import { clearCart } from "../redux/slices/cartSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -99,6 +100,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     setShowUserMenu(false);
     navigate("/");
   };

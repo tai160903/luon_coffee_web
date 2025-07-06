@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 import {
   FaHome,
   FaBoxOpen,
@@ -10,6 +10,7 @@ import {
   FaSignOutAlt,
   FaBell,
   FaSearch,
+  FaArrowLeft,
 } from "react-icons/fa";
 import { FaCoffee } from "react-icons/fa";
 
@@ -65,6 +66,15 @@ function ManagerLayout() {
         </div>
 
         <nav className="mt-10 px-4 space-y-2">
+          {/* Thêm nút quay về trang chủ */}
+          <Link
+            to="/"
+            className="flex items-center px-4 py-3 text-white/80 transition-colors rounded-lg hover:bg-[#6b3305] hover:text-white"
+          >
+            <FaArrowLeft className="w-5 h-5" />
+            <span className="mx-4">Quay về trang chủ</span>
+          </Link>
+
           {renderNavLink(
             "/manager",
             <FaHome className="w-5 h-5" />,
