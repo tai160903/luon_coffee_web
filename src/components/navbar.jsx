@@ -38,6 +38,7 @@ const Navbar = () => {
   const walletBalance = user?.wallet ?? 0;
 
   const cartItems = useSelector((state) => state.cart.cartItems);
+  console.log("Cart items:", cartItems);
   const cartCount = cartItems?.length || 0;
 
   const getUserDisplayName = () => {
@@ -170,7 +171,7 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {isAuthenticated && role && (
+              {/* {isAuthenticated && role && (
                 <Link
                   to="/wallet"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 border border-gray-200 hover:border-green-200"
@@ -180,7 +181,7 @@ const Navbar = () => {
                     {formatCurrency(walletBalance)}
                   </span>
                 </Link>
-              )}
+              )} */}
 
               {isAuthenticated && role && (
                 <Link

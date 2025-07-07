@@ -26,7 +26,11 @@ import NotFound from "../pages/NotFound";
 import ProfileLayout from "../components/profileLayout";
 import ProtectedRoute from "../utils/protectedRoute";
 import Location from "../pages/Location";
-import Wallet from "../pages/Wallet";
+import Category from "../pages/manager/Category";
+import Order from "../pages/manager/Order";
+import Customers from "../pages/manager/Customer";
+import PromotionManagement from "../pages/manager/Promotion";
+// import Wallet from "../pages/Wallet";
 
 const router = createBrowserRouter([
   {
@@ -45,10 +49,10 @@ const router = createBrowserRouter([
         path: "menu",
         element: <Menu />,
       },
-      {
-        path: "wallet",
-        element: <Wallet />,
-      },
+      // {
+      //   path: "wallet",
+      //   element: <Wallet />,
+      // },
       {
         path: "cart",
         element: (
@@ -138,8 +142,24 @@ const router = createBrowserRouter([
         element: <Product />,
       },
       {
+        path: "categories",
+        element: <Category />,
+      },
+      {
+        path: "orders",
+        element: <Order />,
+      },
+      {
         path: "inventory",
         element: <Inventory />,
+      },
+      {
+        path: "customers",
+        element: <Customers />,
+      },
+      {
+        path: "promotions",
+        element: <PromotionManagement />,
       },
       {
         path: "menu-management",

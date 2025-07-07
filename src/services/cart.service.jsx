@@ -6,7 +6,7 @@ const cartService = {
   addToCart: async (data) => {
     try {
       const response = await instance.post("/Cart/add-customize-to-cart", data);
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error adding item to cart:", error.message);
       return null;

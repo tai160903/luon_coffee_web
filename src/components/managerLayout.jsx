@@ -13,6 +13,7 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import { FaCoffee } from "react-icons/fa";
+import { FaBoxesStacked } from "react-icons/fa6";
 
 function ManagerLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -86,10 +87,21 @@ function ManagerLayout() {
             "Sản phẩm"
           )}
           {renderNavLink(
+            "/manager/categories",
+            <FaBoxesStacked className="w-5 h-5" />,
+            "Danh mục"
+          )}
+          {renderNavLink(
             "/manager/orders",
             <FaShoppingCart className="w-5 h-5" />,
             "Đơn"
           )}
+          {renderNavLink(
+            "/manager/promotions",
+            <FaBoxOpen className="w-5 h-5" />,
+            "Khuyến mãi"
+          )}
+
           {renderNavLink(
             "/manager/staffs",
             <FaUsers className="w-5 h-5" />,

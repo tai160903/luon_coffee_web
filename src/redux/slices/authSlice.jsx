@@ -10,8 +10,6 @@ export const login = createAsyncThunk(
 
       const data = res?.data?.data;
 
-      console.log("data", data);
-
       let role = null;
       if (data.accessToken) {
         try {

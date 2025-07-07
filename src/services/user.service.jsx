@@ -10,6 +10,16 @@ const userService = {
       return null;
     }
   },
+
+  getAllCustomer: async () => {
+    try {
+      const response = await instance.get("/Customer");
+      return response;
+    } catch (error) {
+      console.error("Error fetching all customers:", error.message);
+      return null;
+    }
+  },
 };
 
 export default userService;

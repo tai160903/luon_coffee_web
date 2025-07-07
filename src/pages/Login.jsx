@@ -64,7 +64,10 @@ const Login = () => {
 
     try {
       const resultAction = await dispatch(
-        login({ username: formData.username, password: formData.password })
+        login({
+          username: formData.username.toLocaleLowerCase(),
+          password: formData.password,
+        })
       );
       if (
         resultAction.meta.requestStatus === "fulfilled" &&
@@ -72,6 +75,7 @@ const Login = () => {
       ) {
         try {
           const res = await cartService.getCart();
+          console.log(res);
           if (res && res?.data) {
             dispatch(setCartInfo(res?.data));
           }

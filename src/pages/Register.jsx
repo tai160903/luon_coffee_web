@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Coffee } from "lucide-react";
 import authService from "../services/auth.service";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -65,12 +66,12 @@ const Register = () => {
     setIsLoading(true);
     try {
       await authService.register({
-        username: formData.username,
+        username: formData.username.toLocaleLowerCase(),
         email: formData.email,
         password: formData.password,
       });
-      alert("Đăng ký thành công!");
-      navigate("/login"); // Chuyển hướng sang trang đăng nhập sau khi đăng ký thành công
+      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+      navigate("/login");
     } catch (error) {
       setErrors({ username: "Đăng ký thất bại. Vui lòng thử lại." });
     }

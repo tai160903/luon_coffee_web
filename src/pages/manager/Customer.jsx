@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -15,6 +15,7 @@ import {
   X,
   Save,
 } from "lucide-react";
+import userService from "../../services/user.service";
 
 const Customers = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +33,34 @@ const Customers = () => {
     address: "",
   });
 
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      const res = await userService.getAllCustomer();
+      if (res && res.data.data) {
+        const mapped = res.data.data.map((c) => ({
+          id: c.id,
+          name: c.fullName,
+          phone: c.phoneNumber,
+          email: c.email || "",
+          dateOfBirth: c.birthDate ? c.birthDate.split("T")[0] : "",
+          address: c.address || "",
+          joinDate: c.createdDate ? c.createdDate.split("T")[0] : "",
+          totalOrders: c.totalOrders || 0,
+          totalSpent: c.wallet || 0,
+          lastVisit: c.lastVisit || "",
+          tier: c.tier || "new",
+          points: c.points || 0,
+          favoriteItems: c.favoriteItems || [],
+          notes: c.notes || "",
+        }));
+        setCustomers(mapped);
+      }
+    };
+    fetchCustomers();
+  }, []);
+
   const filters = [
     { id: "all", name: "Tất Cả", count: 245 },
     { id: "vip", name: "VIP", count: 28 },
@@ -39,62 +68,11 @@ const Customers = () => {
     { id: "new", name: "Mới", count: 123 },
   ];
 
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Văn An",
-      phone: "0901234567",
-      email: "nguyenvanan@email.com",
-      dateOfBirth: "1990-05-15",
-      address: "123 Lê Lợi, Quận 1, TP.HCM",
-      joinDate: "2023-06-15",
-      totalOrders: 28,
-      totalSpent: 1400000,
-      lastVisit: "2024-01-15",
-      tier: "vip",
-      points: 1250,
-      favoriteItems: ["Cà Phê Phin Truyền Thống", "Bánh Mì Thịt Nướng"],
-      notes: "Khách hàng thân thiết, thích cà phê đậm đà",
-    },
-    {
-      id: 2,
-      name: "Trần Thị Bình",
-      phone: "0912345678",
-      email: "tranthib@email.com",
-      dateOfBirth: "1985-08-22",
-      address: "456 Nguyễn Huệ, Quận 1, TP.HCM",
-      joinDate: "2023-08-10",
-      totalOrders: 15,
-      totalSpent: 750000,
-      lastVisit: "2024-01-12",
-      tier: "regular",
-      points: 750,
-      favoriteItems: ["Cà Phê Trứng", "Trà Sen"],
-      notes: "Thường đặt vào buổi sáng",
-    },
-    {
-      id: 3,
-      name: "Lê Văn Cường",
-      phone: "0923456789",
-      email: "levancuong@email.com",
-      dateOfBirth: "1992-12-03",
-      address: "789 Đồng Khởi, Quận 1, TP.HCM",
-      joinDate: "2024-01-05",
-      totalOrders: 3,
-      totalSpent: 150000,
-      lastVisit: "2024-01-14",
-      tier: "new",
-      points: 150,
-      favoriteItems: ["Cà Phê Đá"],
-      notes: "Khách hàng mới, cần chăm sóc",
-    },
-  ]);
-
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.phone.includes(searchQuery) ||
-      customer.email.toLowerCase().includes(searchQuery.toLowerCase());
+      customer.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer.phone?.includes(searchQuery) ||
+      customer.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesFilter =
       selectedFilter === "all" || customer.tier === selectedFilter;

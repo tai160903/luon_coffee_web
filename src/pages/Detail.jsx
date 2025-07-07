@@ -92,9 +92,7 @@ const Detail = () => {
 
   const handleAddToCart = async () => {
     if (!product || !selectedSize) {
-      toast.error("Vui lòng chọn đầy đủ thông tin sản phẩm", {
-        theme: "colored",
-      });
+      toast.error("Vui lòng chọn đầy đủ thông tin sản phẩm");
       return;
     }
     setAddingToCart(true);
@@ -110,18 +108,14 @@ const Detail = () => {
 
       if (isAuthenticated) {
         const response = await cartService.addToCart(customize);
-        if (response && response.data) {
-          dispatch(setCartInfo({ cartItems: response.data.cartItems }));
+        if (response.status === 200 && response.data.data) {
+          dispatch(setCartInfo({ cartItems: response.data.data.cartItems }));
         }
       }
 
-      toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`, {
-        theme: "colored",
-      });
+      toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
     } catch (error) {
-      toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.", {
-        theme: "colored",
-      });
+      toast.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
     } finally {
       setAddingToCart(false);
     }
