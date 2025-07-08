@@ -22,6 +22,7 @@ import {
   Package,
 } from "lucide-react";
 import orderService from "../../services/order.service";
+import formatCurrency from "../../utils/formatCurrency";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -384,7 +385,7 @@ export default function OrderHistory() {
                   <div className="flex flex-col items-end gap-4">
                     <div className="text-right">
                       <div className="text-2xl font-bold text-amber-700">
-                        {order.total.toLocaleString("vi-VN")}₫
+                        {formatCurrency(order.total)}
                       </div>
                       {order.status === "cancelled" && order.cancelReason && (
                         <div className="text-xs text-red-600 mt-1">
@@ -534,10 +535,7 @@ export default function OrderHistory() {
                             Số lượng: {item.quantity}
                           </span>
                           <span className="font-bold text-amber-700">
-                            {(item.price * item.quantity).toLocaleString(
-                              "vi-VN"
-                            )}
-                            ₫
+                            {formatCurrency(item.price * item.quantity)}
                           </span>
                         </div>
                       </div>
@@ -553,7 +551,7 @@ export default function OrderHistory() {
                     Tổng Cộng:
                   </span>
                   <span className="text-2xl font-bold text-green-700">
-                    {selectedOrder.total.toLocaleString("vi-VN")}₫
+                    {formatCurrency(selectedOrder.total)}
                   </span>
                 </div>
               </div>

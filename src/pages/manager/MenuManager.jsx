@@ -17,6 +17,7 @@ import {
   Upload,
   DollarSign,
 } from "lucide-react";
+import formatCurrency from "../../utils/formatCurrency";
 
 const MenuManagement = () => {
   const [activeCategory, setActiveCategory] = useState("coffee");
@@ -309,11 +310,11 @@ const MenuManagement = () => {
 
               <div className="mb-4">
                 <div className="text-2xl font-bold text-amber-700 mb-2">
-                  {item.price.toLocaleString("vi-VN")}₫
+                  {formatCurrency(item.price)}
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Đã bán: {item.soldToday}</span>
-                  <span>DT: {item.revenue.toLocaleString("vi-VN")}₫</span>
+                  <span>DT: {formatCurrency(item.revenue)}</span>
                 </div>
               </div>
 

@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
   Smartphone,
-  Wallet,
+  // Wallet,
   Clock,
   User,
   Phone,
@@ -31,17 +31,17 @@ const Payment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Lấy orderData trực tiếp từ Redux
   const orderData = useSelector((state) => state.order.checkoutData);
+  console.log("Order Data:", orderData);
 
   const paymentMethods = [
-    {
-      id: "wallet",
-      name: "Ví Của Tôi",
-      description: "Thanh toán bằng số dư ví tài khoản",
-      icon: Wallet,
-      color: "from-green-500 to-green-600",
-    },
+    // {
+    //   id: "wallet",
+    //   name: "Ví Của Tôi",
+    //   description: "Thanh toán bằng số dư ví tài khoản",
+    //   icon: Wallet,
+    //   color: "from-green-500 to-green-600",
+    // },
     {
       id: "payos",
       name: "PayOS",
@@ -83,6 +83,7 @@ const Payment = () => {
     try {
       // Prepare order payload
       const payload = {
+        code: orderData.promoCode,
         pickupTime: orderData.pickupTime,
         fullName: customerInfo.fullName,
         phoneNumber: customerInfo.phone,
@@ -354,7 +355,7 @@ const Payment = () => {
                 {orderData.discount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Giảm giá</span>
-                    <span>-{orderData.discount.toLocaleString("vi-VN")}₫</span>
+                    <span>-{formatCurrency(orderData.discount)}</span>
                   </div>
                 )}
 
@@ -362,7 +363,7 @@ const Payment = () => {
                   <div className="flex justify-between text-xl font-bold text-gray-800">
                     <span>Tổng cộng</span>
                     <span className="text-amber-700">
-                      {orderData.total.toLocaleString("vi-VN")}₫
+                      {formatCurrency(orderData.total)}
                     </span>
                   </div>
                 </div>

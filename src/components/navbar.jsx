@@ -38,12 +38,14 @@ const Navbar = () => {
   const walletBalance = user?.wallet ?? 0;
 
   const cartItems = useSelector((state) => state.cart.cartItems);
-  console.log("Cart items:", cartItems);
   const cartCount = cartItems?.length || 0;
 
   const getUserDisplayName = () => {
     if (user?.fullName) return user.fullName;
-
+    if (user?.staffName) return user.staffName;
+    if (user?.managerName) return user.managerName;
+    if (role === "STAFF") return "Nhân viên";
+    if (role === "ADMIN") return "Quản lý";
     return "Khách Hàng";
   };
 
@@ -52,9 +54,17 @@ const Navbar = () => {
     if (user?.fullName && user.fullName.length > 0) {
       return user.fullName.charAt(0).toUpperCase();
     }
+    if (user?.staffName && user.staffName.length > 0) {
+      return user.staffName.charAt(0).toUpperCase();
+    }
+    if (user?.managerName && user.managerName.length > 0) {
+      return user.managerName.charAt(0).toUpperCase();
+    }
     if (user?.email && user.email.length > 0) {
       return user.email.charAt(0).toUpperCase();
     }
+    if (role === "STAFF") return "N";
+    if (role === "ADMIN") return "Q";
     return "K";
   };
 
@@ -183,7 +193,7 @@ const Navbar = () => {
                 </Link>
               )} */}
 
-              {isAuthenticated && role && (
+              {isAuthenticated && role === "CUSTOMER" && (
                 <Link
                   to="/cart"
                   className="p-3 text-gray-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all duration-300 relative"

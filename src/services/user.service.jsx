@@ -20,6 +20,16 @@ const userService = {
       return null;
     }
   },
+
+  updateProfile: async (data) => {
+    try {
+      const response = await instance.put("/Customer/update-customer", data);
+      return response;
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+      return null;
+    }
+  },
 };
 
 export default userService;

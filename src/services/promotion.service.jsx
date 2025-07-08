@@ -11,6 +11,18 @@ const promotionService = {
     }
   },
 
+  applyPromotion: async (code) => {
+    try {
+      const response = await instance.get(
+        `/Promotion/get-by-code?code=${code}`
+      );
+      return response;
+    } catch (error) {
+      console.error("Error applying promotion:", error.message);
+      return null;
+    }
+  },
+
   createPromotion: async (data) => {
     try {
       const response = await instance.post("/Promotion", data);

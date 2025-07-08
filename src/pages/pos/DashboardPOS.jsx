@@ -13,6 +13,7 @@ import {
   BarChart3,
   PieChart,
 } from "lucide-react";
+import formatCurrency from "../../utils/formatCurrency";
 
 const Dashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("today");
@@ -208,7 +209,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-gray-800 mb-1">
-            {currentStats.revenue.toLocaleString("vi-VN")}₫
+            {formatCurrency(currentStats.revenue)}
           </div>
           <div className="text-gray-600 text-sm">Doanh thu</div>
         </div>
@@ -262,7 +263,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="text-2xl font-bold text-gray-800 mb-1">
-            {currentStats.avgOrder.toLocaleString("vi-VN")}₫
+            {formatCurrency(currentStats.avgOrder)}
           </div>
           <div className="text-gray-600 text-sm">Giá trị TB/đơn</div>
         </div>
@@ -290,7 +291,7 @@ const Dashboard = () => {
                     ></div>
                   </div>
                   <div className="w-20 text-sm font-medium text-gray-800 text-right">
-                    {data.revenue.toLocaleString("vi-VN")}₫
+                    {formatCurrency(data.revenue)}
                   </div>
                   <div className="w-12 text-sm text-gray-600 text-right">
                     {data.orders}
@@ -321,7 +322,7 @@ const Dashboard = () => {
                     <h4 className="font-medium text-gray-800">{item.name}</h4>
                     <div className="text-sm text-gray-600">
                       Đã bán: {item.sold} | Doanh thu:{" "}
-                      {item.revenue.toLocaleString("vi-VN")}₫
+                      {formatCurrency(item.revenue)}
                     </div>
                   </div>
                   {getTrendIcon(item.trend)}
@@ -358,7 +359,7 @@ const Dashboard = () => {
                     </div>
                     <div className="text-xs text-gray-600">
                       {order.time} • {order.items} món •{" "}
-                      {order.total.toLocaleString("vi-VN")}₫
+                      {formatCurrency(order.total)}
                     </div>
                   </div>
                   <span

@@ -17,6 +17,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProductService from "../services/product.service";
 import sizeService from "../services/size.service";
 import cartService from "../services/cart.service";
+import formatCurrency from "../utils/formatCurrency";
 
 const Detail = () => {
   const { id } = useParams();
@@ -230,7 +231,7 @@ const Detail = () => {
                       </div>
                       {size.extraPrice > 0 && (
                         <div className="text-xs font-medium text-amber-700">
-                          +{size.extraPrice.toLocaleString("vi-VN")}₫
+                          +{formatCurrency(size.extraPrice)}
                         </div>
                       )}
                     </div>
@@ -264,7 +265,7 @@ const Detail = () => {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <div className="text-3xl font-bold text-amber-700">
-                      {calculateTotalPrice().toLocaleString("vi-VN")}₫
+                      {formatCurrency(calculateTotalPrice())}
                     </div>
                     <div className="text-sm text-gray-600">Tổng cộng</div>
                   </div>

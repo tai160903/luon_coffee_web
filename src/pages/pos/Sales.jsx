@@ -94,7 +94,7 @@ const POS = () => {
       try {
         // Đảm bảo lấy đúng mảng sản phẩm từ
         const data = await ProductService.getProducts();
-        setMenuItems(data.data || []);
+        setMenuItems(data.data.items || []);
       } catch (error) {
         setMenuItems([]);
       }
@@ -421,7 +421,7 @@ const POS = () => {
                         {item.name}
                       </h4>
                       <div className="text-amber-700 font-bold text-sm">
-                        {item.price.toLocaleString("vi-VN")}₫
+                        {formatCurrency(item.price)}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -459,7 +459,7 @@ const POS = () => {
                 <div className="flex justify-between items-center text-2xl font-bold">
                   <span>Tổng cộng:</span>
                   <span className="text-amber-700">
-                    {calculateTotal().toLocaleString("vi-VN")}₫
+                    {formatCurrency(calculateTotal())}
                   </span>
                 </div>
               </div>

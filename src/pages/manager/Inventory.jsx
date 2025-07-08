@@ -14,6 +14,7 @@ import {
   X,
   Save,
 } from "lucide-react";
+import formatCurrency from "../../utils/formatCurrency";
 
 const Inventory = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -480,14 +481,13 @@ const Inventory = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Đơn giá:</span>
                 <span className="font-medium text-gray-800">
-                  {item.unitPrice.toLocaleString("vi-VN")}₫/{item.unit}
+                  {formatCurrency(item.unitPrice)}/{item.unit}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Giá trị:</span>
                 <span className="font-medium text-amber-700">
-                  {(item.currentStock * item.unitPrice).toLocaleString("vi-VN")}
-                  ₫
+                  {formatCurrency(item.currentStock * item.unitPrice)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -766,7 +766,7 @@ const Inventory = () => {
                 <div className="bg-gray-50 rounded-2xl p-4">
                   <div className="text-sm text-gray-600">Đơn giá</div>
                   <div className="font-medium text-gray-800">
-                    {selectedItem.unitPrice.toLocaleString("vi-VN")}₫
+                    {formatCurrency(selectedItem.unitPrice)}
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-4">

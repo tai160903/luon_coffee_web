@@ -470,9 +470,6 @@ const Orders = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 flex items-center justify-center text-gray-600">
-                      ₫
-                    </div>
                     <div>
                       <span className="text-gray-600">
                         Phương thức thanh toán:{" "}

@@ -56,7 +56,7 @@ const router = createBrowserRouter([
       {
         path: "cart",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"CUSTOMER"}>
             <Cart />
           </ProtectedRoute>
         ),

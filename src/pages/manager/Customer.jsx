@@ -16,6 +16,7 @@ import {
   Save,
 } from "lucide-react";
 import userService from "../../services/user.service";
+import formatCurrency from "../../utils/formatCurrency";
 
 const Customers = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -266,7 +267,7 @@ const Customers = () => {
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-2xl">
                 <div className="text-lg font-bold text-amber-700">
-                  {customer.totalSpent.toLocaleString("vi-VN")}₫
+                  {formatCurrency(customer.totalSpent)}
                 </div>
                 <div className="text-xs text-gray-600">Tổng chi tiêu</div>
               </div>
@@ -496,7 +497,7 @@ const Customers = () => {
                     <div>
                       <div className="text-sm text-gray-600">Tổng chi tiêu</div>
                       <div className="text-xl font-bold text-green-700">
-                        {selectedCustomer.totalSpent.toLocaleString("vi-VN")}₫
+                        {formatCurrency(selectedCustomer.totalSpent)}
                       </div>
                     </div>
                   </div>

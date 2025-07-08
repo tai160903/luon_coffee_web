@@ -17,18 +17,19 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import cartService from "../services/cart.service";
+import promotionService from "../services/promotion.service";
 import { removeFromCart, setCartInfo } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 import { setCheckoutData } from "../redux/slices/orderSlice";
 const Cart = () => {
   const dispatch = useDispatch();
   const [cartItems, setCartItems] = useState([]);
-
   const [selectedPickupDate, setSelectedPickupDate] = useState("");
   const [selectedPickupTime, setSelectedPickupTime] = useState("");
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [promotion, setPromotion] = useState(null);
 
   useEffect(() => {
     fetchCart();
@@ -201,22 +202,42 @@ const Cart = () => {
     }
   };
 
-  const applyPromoCode = () => {
-    if (promoCode.toLowerCase() === "welcome10") {
-      setPromoApplied(true);
+  const applyPromoCode = async () => {
+    if (!promoCode) return;
+    try {
+      const response = await promotionService.applyPromotion(promoCode);
+      console.log(response.data);
+      if (response && response.data.data) {
+        setPromotion(response.data.data);
+        setPromoApplied(true);
+        toast.success("Áp dụng mã giảm giá thành công!");
+      } else {
+        setPromotion(null);
+        setPromoApplied(false);
+        toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+      }
+    } catch (error) {
+      setPromotion(null);
+      setPromoApplied(false);
+      toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
     }
   };
 
   const removePromoCode = () => {
     setPromoApplied(false);
     setPromoCode("");
+    setPromotion(null);
   };
 
+  // Tính toán giảm giá dựa trên promotion API
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item?.customize?.price * item.quantity,
     0
   );
-  const discount = promoApplied ? subtotal * 0.1 : 0;
+  const discount =
+    promoApplied && promotion && promotion.discountPercent
+      ? Math.floor((subtotal * promotion.discountPercent) / 100)
+      : 0;
   const total = subtotal - discount;
 
   const handleCheckout = () => {
@@ -229,7 +250,7 @@ const Cart = () => {
         selectedPickupDate && selectedPickupTime
           ? `${selectedPickupDate}T${selectedPickupTime}`
           : "",
-      promoCode: promoApplied ? "WELCOME10" : null,
+      promoCode: promoApplied ? promoCode : null,
     };
     dispatch(setCheckoutData(orderData));
   };
@@ -558,8 +579,13 @@ const Cart = () => {
                       <div className="flex items-center gap-2">
                         <Gift className="w-4 h-4 text-green-600" />
                         <span className="text-green-800 font-medium">
-                          WELCOME10
+                          {promotion?.code || promoCode}
                         </span>
+                        {promotion?.discountPercent && (
+                          <span className="ml-2 text-green-700 text-xs font-semibold">
+                            -{promotion.discountPercent}%
+                          </span>
+                        )}
                       </div>
                       <button
                         onClick={removePromoCode}
@@ -575,19 +601,19 @@ const Cart = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Tạm tính ({cartItems.length} món)</span>
-                    <span>{subtotal.toLocaleString("vi-VN")}₫</span>
+                    <span>{formatCurrency(subtotal)}</span>
                   </div>
-                  {promoApplied && (
+                  {promoApplied && promotion && (
                     <div className="flex justify-between text-green-600">
-                      <span>Giảm giá (10%)</span>
-                      <span>-{discount.toLocaleString("vi-VN")}₫</span>
+                      <span>Giảm giá ({promotion.discountPercent}%)</span>
+                      <span>-{formatCurrency(discount)}</span>
                     </div>
                   )}
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-xl font-bold text-gray-800">
                       <span>Tổng cộng</span>
                       <span className="text-amber-700">
-                        {total.toLocaleString("vi-VN")}₫
+                        {formatCurrency(total)}
                       </span>
                     </div>
                   </div>
