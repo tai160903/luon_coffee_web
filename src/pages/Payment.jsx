@@ -30,8 +30,9 @@ const Payment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const orderData = useSelector((state) => state.order.checkoutData);
+  const orderData = useSelector((state) => state.order.checkoutData) || {};
   console.log("Order Data:", orderData);
+  const orderItems = Array.isArray(orderData.items) ? orderData.items : [];
 
   const paymentMethods = [
     {
@@ -82,10 +83,10 @@ const Payment = () => {
     try {
       // Prepare order payload
       const payload = {
-        code: orderData.promoCode,
-        pickupTime: orderData.pickupTime,
-        fullName: customerInfo.fullName,
-        phoneNumber: customerInfo.phone,
+        code: orderData?.promoCode || "",
+        pickupTime: orderData?.pickupTime || "",
+        fullName: customerInfo?.fullName,
+        phoneNumber: customerInfo?.phone,
       };
 
       let response;
@@ -296,7 +297,7 @@ const Payment = () => {
               {/* Order Items */}
               <div className="space-y-3 mb-6">
                 <h4 className="font-semibold text-gray-800">Món Đã Đặt</h4>
-                {orderData.items.map((item) => (
+                {orderItems.map((item) => (
                   <div
                     key={item.id}
                     className="flex justify-between items-start text-sm"
@@ -325,7 +326,7 @@ const Payment = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Tạm tính</span>
-                  <span>{formatCurrency(orderData.subtotal)}</span>
+                  <span>{formatCurrency(orderData.subtotal || 0)}</span>
                 </div>
                 {orderData.discount > 0 && (
                   <div className="flex justify-between text-green-600">
@@ -338,7 +339,7 @@ const Payment = () => {
                   <div className="flex justify-between text-xl font-bold text-gray-800">
                     <span>Tổng cộng</span>
                     <span className="text-amber-700">
-                      {formatCurrency(orderData.total)}
+                      {formatCurrency(orderData.total || 0)}
                     </span>
                   </div>
                 </div>
