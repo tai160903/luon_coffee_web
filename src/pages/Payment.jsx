@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
-  Smartphone,
-  // Wallet,
+  Wallet,
   Clock,
   User,
   Phone,
@@ -35,13 +34,13 @@ const Payment = () => {
   console.log("Order Data:", orderData);
 
   const paymentMethods = [
-    // {
-    //   id: "wallet",
-    //   name: "Ví Của Tôi",
-    //   description: "Thanh toán bằng số dư ví tài khoản",
-    //   icon: Wallet,
-    //   color: "from-green-500 to-green-600",
-    // },
+    {
+      id: "wallet",
+      name: "Ví Của Tôi",
+      description: "Thanh toán bằng số dư ví tài khoản",
+      icon: Wallet,
+      color: "from-green-500 to-green-600",
+    },
     {
       id: "payos",
       name: "PayOS",
@@ -264,30 +263,6 @@ const Payment = () => {
                   );
                 })}
               </div>
-
-              {/* E-wallet Options */}
-              {paymentMethod === "ewallet" && (
-                <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">
-                    Chọn Ví Điện Tử
-                  </h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {["MoMo", "ZaloPay", "VNPay"].map((wallet) => (
-                      <button
-                        key={wallet}
-                        className="p-4 border-2 border-gray-200 rounded-2xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-300"
-                      >
-                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                          <Smartphone className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <div className="font-medium text-gray-800">
-                          {wallet}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

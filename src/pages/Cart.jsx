@@ -8,8 +8,8 @@ import {
   Clock,
   ArrowRight,
   Coffee,
-  Tag,
-  Gift,
+  // Tag,
+  // Gift,
   AlertCircle,
   ChevronRight,
 } from "lucide-react";
@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import cartService from "../services/cart.service";
-import promotionService from "../services/promotion.service";
+// import promotionService from "../services/promotion.service";
 import { removeFromCart, setCartInfo } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 import { setCheckoutData } from "../redux/slices/orderSlice";
@@ -26,10 +26,10 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [selectedPickupDate, setSelectedPickupDate] = useState("");
   const [selectedPickupTime, setSelectedPickupTime] = useState("");
-  const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
+  // const [promoCode, setPromoCode] = useState("");
+  // const [promoApplied, setPromoApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [promotion, setPromotion] = useState(null);
+  // const [promotion, setPromotion] = useState(null);
 
   useEffect(() => {
     fetchCart();
@@ -202,42 +202,42 @@ const Cart = () => {
     }
   };
 
-  const applyPromoCode = async () => {
-    if (!promoCode) return;
-    try {
-      const response = await promotionService.applyPromotion(promoCode);
-      console.log(response.data);
-      if (response && response.data.data) {
-        setPromotion(response.data.data);
-        setPromoApplied(true);
-        toast.success("Áp dụng mã giảm giá thành công!");
-      } else {
-        setPromotion(null);
-        setPromoApplied(false);
-        toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
-      }
-    } catch (error) {
-      setPromotion(null);
-      setPromoApplied(false);
-      toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
-    }
-  };
+  // const applyPromoCode = async () => {
+  //   if (!promoCode) return;
+  //   try {
+  //     const response = await promotionService.applyPromotion(promoCode);
+  //     console.log(response.data);
+  //     if (response && response.data.data) {
+  //       setPromotion(response.data.data);
+  //       setPromoApplied(true);
+  //       toast.success("Áp dụng mã giảm giá thành công!");
+  //     } else {
+  //       setPromotion(null);
+  //       setPromoApplied(false);
+  //       toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+  //     }
+  //   } catch (error) {
+  //     setPromotion(null);
+  //     setPromoApplied(false);
+  //     toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+  //   }
+  // };
 
-  const removePromoCode = () => {
-    setPromoApplied(false);
-    setPromoCode("");
-    setPromotion(null);
-  };
+  // const removePromoCode = () => {
+  //   setPromoApplied(false);
+  //   setPromoCode("");
+  //   setPromotion(null);
+  // };
 
   // Tính toán giảm giá dựa trên promotion API
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item?.customize?.price * item.quantity,
     0
   );
-  const discount =
-    promoApplied && promotion && promotion.discountPercent
-      ? Math.floor((subtotal * promotion.discountPercent) / 100)
-      : 0;
+  const discount = 0;
+  //   promoApplied && promotion && promotion.discountPercent
+  //     ? Math.floor((subtotal * promotion.discountPercent) / 100)
+  //     : 0;
   const total = subtotal - discount;
 
   const handleCheckout = () => {
@@ -250,7 +250,7 @@ const Cart = () => {
         selectedPickupDate && selectedPickupTime
           ? `${selectedPickupDate}T${selectedPickupTime}`
           : "",
-      promoCode: promoApplied ? promoCode : null,
+      // promoCode: promoApplied ? promoCode : null,
     };
     dispatch(setCheckoutData(orderData));
   };
@@ -551,7 +551,7 @@ const Cart = () => {
                 )}
 
                 {/* Promo Code */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Tag className="w-4 h-4 text-gray-600" />
                     <span className="font-semibold text-gray-800">
@@ -595,7 +595,7 @@ const Cart = () => {
                       </button>
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* Price Breakdown */}
                 <div className="space-y-3 mb-6">
@@ -603,12 +603,12 @@ const Cart = () => {
                     <span>Tạm tính ({cartItems.length} món)</span>
                     <span>{formatCurrency(subtotal)}</span>
                   </div>
-                  {promoApplied && promotion && (
+                  {/* {promoApplied && promotion && (
                     <div className="flex justify-between text-green-600">
                       <span>Giảm giá ({promotion.discountPercent}%)</span>
                       <span>-{formatCurrency(discount)}</span>
                     </div>
-                  )}
+                  )} */}
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between text-xl font-bold text-gray-800">
                       <span>Tổng cộng</span>

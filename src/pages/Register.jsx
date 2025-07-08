@@ -17,6 +17,11 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [pendingUsername, setPendingUsername] = useState("");
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -38,6 +43,10 @@ const Register = () => {
 
     if (!formData.username.trim()) {
       newErrors.username = "Vui lòng nhập tên đăng nhập";
+    } else if (formData.username.length < 4) {
+      newErrors.username = "Tên đăng nhập phải có ít nhất 4 ký tự";
+    } else if (/[^a-zA-Z0-9]/.test(formData.username)) {
+      newErrors.username = "Tên đăng nhập chỉ được chứa chữ cái và số";
     }
     if (!formData.email.trim()) {
       newErrors.email = "Vui lòng nhập email";
@@ -70,12 +79,45 @@ const Register = () => {
         email: formData.email,
         password: formData.password,
       });
-      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-      navigate("/login");
+      setPendingUsername(formData.username.toLocaleLowerCase());
+      setShowOtpModal(true);
+      toast.success(
+        "Đăng ký thành công! Vui lòng nhập mã OTP được gửi về email."
+      );
     } catch (error) {
       setErrors({ username: "Đăng ký thất bại. Vui lòng thử lại." });
     }
     setIsLoading(false);
+  };
+
+  const handleVerifyOtp = async () => {
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      await authService.verifyOTP(pendingUsername, otp);
+      setShowOtpModal(false);
+      toast.success("Xác thực OTP thành công! Vui lòng đăng nhập.");
+      navigate("/login");
+    } catch (error) {
+      setOtpError(
+        error?.response?.data?.message ||
+          error?.response?.data?.detail ||
+          "Mã OTP không đúng hoặc đã hết hạn."
+      );
+    }
+    setOtpLoading(false);
+  };
+
+  const handleResendOtp = async () => {
+    setOtpLoading(true);
+    setOtpError("");
+    try {
+      await authService.resendOTP(pendingUsername);
+      toast.success("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
+    } catch (error) {
+      setOtpError("Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
+    }
+    setOtpLoading(false);
   };
 
   return (
@@ -294,6 +336,64 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm relative">
+            <h2 className="text-xl font-bold mb-4 text-center text-amber-700">
+              Xác thực OTP
+            </h2>
+            <p className="mb-4 text-gray-600 text-center">
+              Vui lòng nhập mã OTP đã gửi về email của bạn để hoàn tất đăng ký.
+            </p>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Nhập mã OTP"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none mb-3 text-center text-lg tracking-widest"
+              maxLength={6}
+              autoFocus
+            />
+            {otpError && (
+              <div className="text-red-600 text-sm mb-2 text-center">
+                {otpError}
+              </div>
+            )}
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={handleVerifyOtp}
+                disabled={otpLoading || !otp}
+                className="flex-1 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50"
+                type="button"
+              >
+                {otpLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mx-auto"></div>
+                ) : (
+                  "Xác nhận"
+                )}
+              </button>
+              <button
+                onClick={handleResendOtp}
+                type="button"
+                disabled={otpLoading}
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl transition-all duration-300"
+              >
+                Gửi lại OTP
+              </button>
+            </div>
+            <button
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-2 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+              aria-label="Đóng"
+              type="button"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

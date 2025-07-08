@@ -30,7 +30,8 @@ import Category from "../pages/manager/Category";
 import Order from "../pages/manager/Order";
 import Customers from "../pages/manager/Customer";
 import PromotionManagement from "../pages/manager/Promotion";
-// import Wallet from "../pages/Wallet";
+import Wallet from "../pages/Wallet";
+import ResetPassword from "../pages/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -49,10 +50,10 @@ const router = createBrowserRouter([
         path: "menu",
         element: <Menu />,
       },
-      // {
-      //   path: "wallet",
-      //   element: <Wallet />,
-      // },
+      {
+        path: "wallet",
+        element: <Wallet />,
+      },
       {
         path: "cart",
         element: (
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: "location",
         element: <Location />,
+      },
+      {
+        path: "reset-password",
+        element: <ResetPassword />,
       },
       {
         path: "profile",

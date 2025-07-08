@@ -22,14 +22,15 @@ export default function FailedPage() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="w-full sm:w-auto flex items-center gap-2 hover:bg-gray-50 border border-gray-200 px-4 py-2 rounded-lg transition"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Quay lại
-          </button>
+          <Link to="/cart">
+            <button
+              type="button"
+              className="w-full sm:w-auto flex items-center gap-2 hover:bg-gray-50 border border-gray-200 px-4 py-2 rounded-lg transition"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Quay lại giỏ hàng
+            </button>
+          </Link>
           <Link to="/">
             <button
               type="button"
