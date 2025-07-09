@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { logout } from "../redux/slices/authSlice";
 import { clearCart } from "../redux/slices/cartSlice";
+import { clearCheckoutData } from "../redux/slices/orderSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,6 +113,7 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(clearCart());
+    dispatch(clearCheckoutData());
     setShowUserMenu(false);
     navigate("/");
   };
@@ -181,7 +183,7 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {isAuthenticated && role && (
+              {isAuthenticated && role === "CUSTOMER" && (
                 <Link
                   to="/wallet"
                   className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-300 border border-gray-200 hover:border-green-200"

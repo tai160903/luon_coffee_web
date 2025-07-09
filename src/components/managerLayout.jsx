@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink, Link } from "react-router-dom";
+import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import {
   FaHome,
   FaBoxOpen,
@@ -14,9 +14,13 @@ import {
 } from "react-icons/fa";
 import { FaCoffee } from "react-icons/fa";
 import { FaBoxesStacked } from "react-icons/fa6";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
 
 function ManagerLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const renderNavLink = (to, icon, label) => (
     <NavLink
@@ -34,6 +38,11 @@ function ManagerLayout() {
       <span className="mx-4">{label}</span>
     </NavLink>
   );
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -115,7 +124,10 @@ function ManagerLayout() {
         </nav>
 
         <div className="absolute bottom-0 w-full p-4">
-          <button className="flex items-center w-full px-4 py-2 text-white/80 transition-colors rounded-lg hover:bg-[#6b3305] hover:text-white">
+          <button
+            className="flex items-center w-full px-4 py-2 text-white/80 transition-colors rounded-lg hover:bg-[#6b3305] hover:text-white"
+            onClick={handleLogout}
+          >
             <FaSignOutAlt className="w-5 h-5" />
             <span className="mx-4">Đăng xuất</span>
           </button>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Coffee,
   ShoppingCart,
@@ -11,11 +11,15 @@ import {
   Bell,
   Home,
 } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/slices/authSlice";
 
 const POSSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   //   const [activeSection, setActiveSection] = useState("pos");
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const posMenuItems = [
     {
@@ -40,6 +44,11 @@ const POSSidebar = () => {
     name: "Nguyễn Văn A",
     role: "Quản lý",
     avatar: "/placeholder.svg?height=40&width=40",
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
   };
 
   return (
@@ -148,7 +157,10 @@ const POSSidebar = () => {
             </div>
 
             {/* Logout Button */}
-            <button className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors font-medium">
+            <button
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-50 text-red-600 rounded-2xl hover:bg-red-100 transition-colors font-medium"
+              onClick={handleLogout}
+            >
               <LogOut className="w-5 h-5" />
               Đăng Xuất
             </button>
