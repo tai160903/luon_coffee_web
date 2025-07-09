@@ -32,6 +32,7 @@ import Customers from "../pages/manager/Customer";
 import PromotionManagement from "../pages/manager/Promotion";
 import Wallet from "../pages/Wallet";
 import ResetPassword from "../pages/ResetPassword";
+import DepositSuccess from "../pages/DepositSuccess";
 
 const router = createBrowserRouter([
   {
@@ -129,6 +130,10 @@ const router = createBrowserRouter([
         <FailedPage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/payment-success/topup",
+    element: <DepositSuccess />,
   },
   {
     path: "/manager",

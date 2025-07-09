@@ -19,6 +19,15 @@ const orderService = {
       return null;
     }
   },
+  getDepositOrders: async (id) => {
+    try {
+      const response = await instance.get(`/Order/get-top-up/${id}`);
+      return response;
+    } catch (error) {
+      console.error("Error fetching deposit orders:", error.message);
+      return [];
+    }
+  },
   getOrdersByCustomer: async () => {
     try {
       const response = await instance.get(`/Order/get-orders-of-customer`);

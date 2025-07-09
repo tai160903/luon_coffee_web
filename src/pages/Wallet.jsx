@@ -3,126 +3,108 @@ import {
   Wallet as WalletIcon,
   CreditCard,
   PlusCircle,
-  History,
-  TrendingUp,
-  Coffee,
-  Loader,
   RefreshCcw,
-  Clock,
-  DollarSign,
+  AlertCircle,
 } from "lucide-react";
 import formatCurrency from "../utils/formatCurrency";
+import paymentService from "../services/payment.service";
+import walletHistoryService from "../services/walletHistory.service"; // Import walletHistoryService
+import { toast } from "react-toastify";
+import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+import { FaDongSign } from "react-icons/fa6";
 
 const Wallet = () => {
-  const [balance, setBalance] = useState(500000); // Example initial balance in VND
-  const [transactions, setTransactions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [balance, setBalance] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [topupAmount, setTopupAmount] = useState(100000);
   const [showTopupModal, setShowTopupModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("all"); // "all", "in", "out"
-
-  // Predefined topup amounts
-  const topupAmounts = [50000, 100000, 200000, 500000];
+  const [history, setHistory] = useState([]); // Add state for wallet history
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    // Simulate API call to fetch wallet data
-    const fetchWalletData = async () => {
-      setIsLoading(true);
-      try {
-        // Simulated data - in real app, fetch from API
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+    setBalance(user?.wallet || 0);
+  }, [user]);
 
-        setBalance(500000);
-        setTransactions([
-          {
-            id: 1,
-            type: "topup",
-            amount: 200000,
-            date: new Date(2023, 9, 15, 14, 30),
-            description: "Nạp tiền vào ví",
-            status: "completed",
-          },
-          {
-            id: 2,
-            type: "purchase",
-            amount: -45000,
-            date: new Date(2023, 9, 14, 10, 15),
-            description: "Cà phê sữa đá",
-            status: "completed",
-          },
-          {
-            id: 3,
-            type: "purchase",
-            amount: -35000,
-            date: new Date(2023, 9, 13, 16, 45),
-            description: "Bánh ngọt",
-            status: "completed",
-          },
-          {
-            id: 4,
-            type: "topup",
-            amount: 300000,
-            date: new Date(2023, 9, 10, 9, 0),
-            description: "Nạp tiền vào ví",
-            status: "completed",
-          },
-          {
-            id: 5,
-            type: "purchase",
-            amount: -55000,
-            date: new Date(2023, 9, 8, 11, 30),
-            description: "Trà sữa trân châu",
-            status: "completed",
-          },
-        ]);
+  useEffect(() => {
+    const fetchWalletHistory = async () => {
+      try {
+        const response = await walletHistoryService.getWalletHistory();
+        if (response?.status === 200 && Array.isArray(response.data?.data)) {
+          setHistory(response.data.data);
+        } else {
+          setHistory([]);
+          toast.error("Không có dữ liệu lịch sử giao dịch.");
+        }
       } catch (error) {
-        console.error("Error fetching wallet data:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching wallet history:", error);
+        toast.error("Không thể tải lịch sử giao dịch.");
       }
     };
 
-    fetchWalletData();
+    fetchWalletHistory();
   }, []);
 
-  const handleTopup = () => {
+  const handleTopup = async () => {
     if (topupAmount < 10000) {
-      alert("Số tiền nạp tối thiểu là 10,000đ");
+      toast.error("Số tiền nạp tối thiểu là 10,000đ");
       return;
     }
 
-    // Simulate API call to add funds
-    setIsLoading(true);
+    setIsProcessing(true);
 
-    // Add a small delay to simulate processing
-    setTimeout(() => {
-      const newTransaction = {
-        id: Date.now(),
-        type: "topup",
-        amount: topupAmount,
-        date: new Date(),
-        description: "Nạp tiền vào ví",
-        status: "completed",
-      };
+    try {
+      const response = await paymentService.depositWallet(topupAmount);
 
-      setBalance((prevBalance) => prevBalance + topupAmount);
-      setTransactions((prev) => [newTransaction, ...prev]);
-      setShowTopupModal(false);
-      setIsLoading(false);
-    }, 1500);
+      if (response?.status === 200 && response.data?.checkoutUrl) {
+        window.location.replace(response.data.checkoutUrl);
+      } else {
+        const errorMsg =
+          response?.data?.message ||
+          response?.message ||
+          "Không thể tạo giao dịch nạp tiền. Vui lòng thử lại sau.";
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Error during topup:", error);
+      toast.error("Đã xảy ra lỗi khi nạp tiền. Vui lòng thử lại sau.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "in") return transaction.amount > 0;
-    if (activeTab === "out") return transaction.amount < 0;
-    return true;
-  });
+  const AmountOption = ({ amount }) => (
+    <button
+      className={`py-2 px-3 border rounded-lg text-center font-medium transition-all ${
+        topupAmount === amount
+          ? "bg-amber-700 text-white border-amber-700"
+          : "bg-white text-gray-800 border-gray-300 hover:bg-amber-50"
+      }`}
+      onClick={() => setTopupAmount(amount)}
+    >
+      {formatCurrency(amount)}
+    </button>
+  );
+
+  AmountOption.propTypes = {
+    amount: PropTypes.number.isRequired,
+  };
+
+  const getTransactionType = (item) => {
+    if (item.description?.toLowerCase().includes("nạp tiền")) {
+      return { type: "Nạp tiền", color: "text-green-600", symbol: "+" };
+    } else if (item.description?.toLowerCase().includes("hoàn tiền")) {
+      return { type: "Hoàn tiền", color: "text-blue-600", symbol: "+" };
+    } else if (item.description?.toLowerCase().includes("thanh toán")) {
+      return { type: "Thanh toán", color: "text-red-600", symbol: "-" };
+    } else {
+      return { type: "Không xác định", color: "text-gray-600", symbol: "" };
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
             Ví Cà Phê
@@ -132,170 +114,77 @@ const Wallet = () => {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="flex flex-col items-center">
-              <Loader className="w-12 h-12 text-amber-500 animate-spin mb-4" />
-              <p className="text-amber-700 font-medium">
-                Đang tải thông tin ví...
-              </p>
+        <div className="bg-gradient-to-r from-amber-600 to-amber-800 rounded-3xl shadow-lg overflow-hidden mb-8">
+          <div className="relative p-6">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-2">
+                <WalletIcon className="h-6 w-6 text-amber-200" />
+                <h2 className="text-white/90 font-medium">Số Dư Hiện Tại</h2>
+              </div>
+              <div className="text-4xl font-bold text-white mb-6">
+                {formatCurrency(balance)}
+              </div>
+              <button
+                onClick={() => setShowTopupModal(true)}
+                className="bg-white text-amber-700 hover:bg-amber-100 transition-all py-3 px-6 rounded-xl font-medium flex items-center gap-2"
+              >
+                <PlusCircle size={18} />
+                Nạp Tiền
+              </button>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Balance Card */}
-            <div className="bg-gradient-to-r from-amber-600 to-amber-800 rounded-3xl shadow-lg overflow-hidden mb-8">
-              <div className="relative p-6">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+          <div className="bg-black/10 backdrop-blur-sm py-4 px-6">
+            <div className="flex items-center gap-2 text-amber-100">
+              <CreditCard size={18} />
+              <span>Ví của bạn</span>
+            </div>
+          </div>
+        </div>
 
-                {/* Content */}
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-2">
-                    <WalletIcon className="h-6 w-6 text-amber-200" />
-                    <h2 className="text-white/90 font-medium">
-                      Số Dư Hiện Tại
-                    </h2>
-                  </div>
-
-                  <div className="text-4xl font-bold text-white mb-6">
-                    {formatCurrency(balance)}
-                  </div>
-
-                  <button
-                    onClick={() => setShowTopupModal(true)}
-                    className="bg-white text-amber-700 hover:bg-amber-100 transition-all py-3 px-6 rounded-xl font-medium flex items-center gap-2"
+        <div className="bg-white rounded-3xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Lịch sử giao dịch
+          </h2>
+          {history.length > 0 ? (
+            <div className="space-y-4">
+              {history.map((item) => {
+                const { type, color, symbol } = getTransactionType(item);
+                return (
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-center border-b pb-4 mb-4"
                   >
-                    <PlusCircle size={18} />
-                    Nạp Tiền
-                  </button>
-                </div>
-              </div>
-
-              {/* Card Footer */}
-              <div className="bg-black/10 backdrop-blur-sm py-4 px-6">
-                <div className="flex items-center gap-2 text-amber-100">
-                  <CreditCard size={18} />
-                  <span>Ví của bạn</span>
-                </div>
-              </div>
+                    <div>
+                      <p className="text-gray-800 font-medium">
+                        {item.description || "Không có mô tả"}
+                      </p>
+                      <p className="text-gray-600 text-sm">
+                        {item.transactionDate
+                          ? new Date(item.transactionDate).toLocaleString(
+                              "vi-VN"
+                            )
+                          : "Không có ngày"}
+                      </p>
+                      <p className="text-sm text-gray-500">Loại: {type}</p>
+                    </div>
+                    <p className={`text-lg font-bold ${color}`}>
+                      {symbol}
+                      {item?.amountChanged
+                        ? formatCurrency(item.amountChanged)
+                        : "0đ"}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
-
-            {/* Transaction History */}
-            <div className="bg-white rounded-3xl shadow-md overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <History className="text-amber-700" />
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      Lịch Sử Giao Dịch
-                    </h2>
-                  </div>
-
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setActiveTab("all")}
-                      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === "all"
-                          ? "bg-amber-700 text-white shadow-sm"
-                          : "text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Tất cả
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("in")}
-                      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === "in"
-                          ? "bg-amber-700 text-white shadow-sm"
-                          : "text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Nạp tiền
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("out")}
-                      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                        activeTab === "out"
-                          ? "bg-amber-700 text-white shadow-sm"
-                          : "text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      Thanh toán
-                    </button>
-                  </div>
-                </div>
-
-                {filteredTransactions.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
-                    {filteredTransactions.map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className="py-4 flex items-center"
-                      >
-                        {/* Icon */}
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center mr-4 ${
-                            transaction.type === "topup"
-                              ? "bg-green-100"
-                              : "bg-amber-100"
-                          }`}
-                        >
-                          {transaction.type === "topup" ? (
-                            <TrendingUp className={`h-5 w-5 text-green-600`} />
-                          ) : (
-                            <Coffee className={`h-5 w-5 text-amber-600`} />
-                          )}
-                        </div>
-
-                        {/* Transaction details */}
-                        <div className="flex-1">
-                          <h3 className="text-gray-800 font-medium">
-                            {transaction.description}
-                          </h3>
-                          <p className="text-gray-500 text-sm">
-                            {transaction.date.toLocaleDateString("vi-VN", {
-                              day: "numeric",
-                              month: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-
-                        {/* Amount */}
-                        <div
-                          className={`text-right ${
-                            transaction.amount > 0
-                              ? "text-green-600"
-                              : "text-amber-700"
-                          }`}
-                        >
-                          <span className="font-semibold text-lg">
-                            {transaction.amount > 0 ? "+" : ""}
-                            {formatCurrency(transaction.amount)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium text-gray-500">
-                      Chưa có giao dịch nào
-                    </h3>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
+          ) : (
+            <p className="text-gray-600">Không có lịch sử giao dịch.</p>
+          )}
+        </div>
       </div>
 
-      {/* Topup Modal */}
       {showTopupModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl animate-fade-in-up">
@@ -323,41 +212,32 @@ const Wallet = () => {
                 </svg>
               </button>
             </div>
-
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Chọn số tiền muốn nạp
                 </label>
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  {topupAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      className={`py-3 px-4 border rounded-xl text-center font-medium transition-all ${
-                        topupAmount === amount
-                          ? "bg-amber-700 text-white border-amber-700"
-                          : "bg-white text-gray-800 border-gray-300 hover:bg-amber-50"
-                      }`}
-                      onClick={() => setTopupAmount(amount)}
-                    >
-                      {formatCurrency(amount)}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <AmountOption amount={10000} />
+                  <AmountOption amount={20000} />
+                  <AmountOption amount={50000} />
+                  <AmountOption amount={100000} />
+                  <AmountOption amount={200000} />
+                  <AmountOption amount={500000} />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Hoặc nhập số tiền khác
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign size={18} className="text-gray-500" />
+                    <FaDongSign size={18} className="text-gray-500" />
                   </div>
                   <input
                     type="number"
                     min="10000"
-                    step="1000"
+                    step="10000"
                     value={topupAmount}
                     onChange={(e) => setTopupAmount(Number(e.target.value))}
                     className="pl-10 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 py-3"
@@ -367,28 +247,35 @@ const Wallet = () => {
                   Số tiền nạp tối thiểu là 10,000đ
                 </p>
               </div>
-
-              <div className="pt-4">
-                <button
-                  onClick={handleTopup}
-                  disabled={isLoading}
-                  className={`w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${
-                    isLoading ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
-                >
-                  {isLoading ? (
-                    <>
-                      <RefreshCcw size={18} className="animate-spin" />
-                      Đang xử lý...
-                    </>
-                  ) : (
-                    <>
-                      <PlusCircle size={18} />
-                      Nạp {formatCurrency(topupAmount)}
-                    </>
-                  )}
-                </button>
+              <div className="bg-blue-50 p-3 rounded-xl flex items-start gap-3">
+                <AlertCircle
+                  size={20}
+                  className="text-blue-600 flex-shrink-0 mt-0.5"
+                />
+                <p className="text-sm text-blue-700">
+                  Bạn sẽ được chuyển đến cổng thanh toán PayOS để hoàn tất quá
+                  trình nạp tiền.
+                </p>
               </div>
+              <button
+                onClick={handleTopup}
+                disabled={isProcessing}
+                className={`w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                  isProcessing ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <RefreshCcw size={18} className="animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle size={18} />
+                    Nạp {formatCurrency(topupAmount)}
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

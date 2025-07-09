@@ -19,6 +19,18 @@ const paymentService = {
       return null;
     }
   },
+
+  depositWallet: async (amount) => {
+    try {
+      const response = await instance.post("/PayOS/create-top-up-payment-url", {
+        amount,
+      });
+      return response;
+    } catch (error) {
+      console.error("Error depositing to wallet:", error.message);
+      return null;
+    }
+  },
 };
 
 export default paymentService;

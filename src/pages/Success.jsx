@@ -36,7 +36,7 @@ export default function SuccessPage() {
   useEffect(() => {
     if (stored) {
       try {
-        setOrderData(JSON.parse(stored));
+        setOrderData(stored);
       } catch {
         setOrderData(null);
       }
@@ -68,6 +68,8 @@ export default function SuccessPage() {
     fetchUser();
     dispatch(clearCart());
   }, [dispatch]);
+
+  console.log("Order Data:", orderData);
 
   const orderNumber = orderData?.code;
   const amount = orderData?.finalPrice;

@@ -70,6 +70,11 @@ const authSlice = createSlice({
       };
       state.isAuthenticated = true;
     },
+    updateWalletBalance: (state, action) => {
+      if (state.user) {
+        state.user.wallet = action.payload;
+      }
+    },
     logout: (state) => {
       state.user = null;
       state.tokens = null;
@@ -109,6 +114,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { reset, updateUser, updateTokens, logout } = authSlice.actions;
+export const { reset, updateUser, updateTokens, updateWalletBalance, logout } =
+  authSlice.actions;
 
 export default authSlice.reducer;

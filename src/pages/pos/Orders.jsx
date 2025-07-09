@@ -70,7 +70,7 @@ const Orders = () => {
       NEW: "NEW",
       CONFIRMED: "CONFIRMED",
       PREPARING: "PREPARING",
-      READYFORPICKUP: "COMPLETED",
+      READYFORPICKUP: "READYFORPICKUP",
       COMPLETED: "COMPLETED",
       CANCELLED: "CANCELLED",
     },
@@ -80,6 +80,7 @@ const Orders = () => {
       PREPARING: "Sẵn Sàng",
       READY: "Hoàn Thành",
       READYFORPICKUP: "Hoàn Thành",
+      CANCELLED: "Đã Hủy",
     },
     ICON: {
       NEW: <Clock className="w-4 h-4" />,
@@ -171,6 +172,25 @@ const Orders = () => {
       }
     } catch (error) {
       toast.error("Cập nhật trạng thái đơn hàng thất bại!");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const cancelOrder = async (order) => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.updateStatus(
+        order.id,
+        STATUS.STRING_TO_CODE.CANCELLED
+      );
+      if (res) {
+        await fetchOrders();
+        toast.success(`Đơn hàng #${order.orderNumber} đã được hủy.`);
+      }
+    } catch (error) {
+      toast.error("Hủy đơn hàng thất bại!");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -394,7 +414,17 @@ const Orders = () => {
                   Chi Tiết
                 </button>
 
-                {/* Only show next status button if not in final states */}
+                {/* Cancel Order Button */}
+                {order.status === "NEW" && (
+                  <button
+                    onClick={() => cancelOrder(order)}
+                    className="flex-1 bg-red-500 text-white py-1 rounded-lg hover:bg-red-600 transition-colors text-xs"
+                  >
+                    Hủy Đơn
+                  </button>
+                )}
+
+                {/* Next Status Button */}
                 {order.status !== "COMPLETED" &&
                   order.status !== "CANCELLED" && (
                     <button

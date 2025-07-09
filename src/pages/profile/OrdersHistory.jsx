@@ -21,25 +21,50 @@ import {
   Star,
   Package,
 } from "lucide-react";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+
 import orderService from "../../services/order.service";
+import userService from "../../services/user.service";
 import formatCurrency from "../../utils/formatCurrency";
+import { updateWalletBalance } from "../../redux/slices/authSlice";
+
+const STATUS = {
+  CODE_TO_STRING: {
+    0: "NEW",
+    1: "CONFIRMED",
+    2: "PREPARING",
+    3: "READYFORPICKUP",
+    4: "COMPLETED",
+    5: "CANCELLED",
+  },
+  STRING_TO_CODE: {
+    NEW: 0,
+    CONFIRMED: 1,
+    PREPARING: 2,
+    READYFORPICKUP: 3,
+    COMPLETED: 4,
+    CANCELLED: 5,
+  },
+};
 
 export default function OrderHistory() {
+  const dispatch = useDispatch();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Thêm state loading
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      setIsLoading(true); // Bắt đầu loading
+      setIsLoading(true);
       const data = await orderService.getOrdersByCustomer();
-      // Map API data về đúng format UI
       const mapped = (data.data || []).map((order) => ({
-        id: order.code,
+        id: order.id,
+        code: order.code,
         date: order.createAt ? order.createAt.split("T")[0] : "",
         time: order.createAt ? order.createAt.split("T")[1]?.slice(0, 5) : "",
         status: order.status,
@@ -54,7 +79,7 @@ export default function OrderHistory() {
           quantity: item.quantity,
           price: item.unitPrice,
           image: item.imageProduct,
-          note: "", // Nếu có trường note thì lấy, không thì để rỗng
+          note: "",
         })),
         rating: 0,
         review: "",
@@ -62,7 +87,7 @@ export default function OrderHistory() {
       }));
       setOrders(mapped);
       setFilteredOrders(mapped);
-      setIsLoading(false); // Kết thúc loading
+      setIsLoading(false);
     };
     fetchOrders();
   }, []);
@@ -70,12 +95,10 @@ export default function OrderHistory() {
   useEffect(() => {
     let filtered = orders;
 
-    // Filter by status
     if (selectedStatus !== "all") {
       filtered = filtered.filter((order) => order.status === selectedStatus);
     }
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
@@ -92,14 +115,18 @@ export default function OrderHistory() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "processing":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "pending":
+      case "NEW":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "CONFIRMED":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "PREPARING":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "READYFORPICKUP":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "COMPLETED":
+        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -107,13 +134,17 @@ export default function OrderHistory() {
 
   const getStatusText = (status) => {
     switch (status) {
-      case "completed":
+      case "NEW":
+        return "Mới";
+      case "CONFIRMED":
+        return "Đã Xác Nhận";
+      case "COMPLETED":
         return "Hoàn Thành";
-      case "processing":
+      case "PREPARING":
         return "Đang Xử Lý";
-      case "cancelled":
+      case "CANCELLED":
         return "Đã Hủy";
-      case "pending":
+      case "READYFORPICKUP":
         return "Chờ Xử Lý";
       default:
         return "Không Xác Định";
@@ -122,14 +153,18 @@ export default function OrderHistory() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "completed":
-        return <CheckCircle className="w-4 h-4" />;
-      case "processing":
-        return <Clock className="w-4 h-4" />;
-      case "cancelled":
-        return <XCircle className="w-4 h-4" />;
-      case "pending":
+      case "NEW":
         return <Package className="w-4 h-4" />;
+      case "CONFIRMED":
+        return <Clock className="w-4 h-4" />;
+      case "PREPARING":
+        return <Clock className="w-4 h-4" />;
+      case "READYFORPICKUP":
+        return <Package className="w-4 h-4" />;
+      case "COMPLETED":
+        return <CheckCircle className="w-4 h-4" />;
+      case "CANCELLED":
+        return <XCircle className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
     }
@@ -144,22 +179,67 @@ export default function OrderHistory() {
     alert(`Đang thêm các món từ đơn hàng ${order.id} vào giỏ hàng...`);
   };
 
+  const cancelOrder = async (order) => {
+    try {
+      setIsLoading(true);
+      const res = await orderService.updateStatus(
+        order.id,
+        STATUS.STRING_TO_CODE.CANCELLED
+      );
+      if (res) {
+        toast.success(`Đơn hàng #${order.id} đã được hủy.`);
+        setOrders((prevOrders) =>
+          prevOrders.map((o) =>
+            o.id === order.id ? { ...o, status: "CANCELLED" } : o
+          )
+        );
+
+        const profileResponse = await userService.getProfile();
+        if (profileResponse?.status === 200) {
+          const updatedWallet = profileResponse.data?.data?.wallet || 0;
+          dispatch(updateWalletBalance(updatedWallet));
+        }
+      }
+    } catch (error) {
+      toast.error("Hủy đơn hàng thất bại!");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const statusOptions = [
     { value: "all", label: "Tất Cả", count: orders.length },
     {
-      value: "completed",
+      value: "NEW",
+      label: "Mới",
+      count: orders.filter((o) => o.status === "NEW").length,
+    },
+    {
+      value: "CONFIRMED",
+      label: "Đã Xác Nhận",
+      count: orders.filter((o) => o.status === "CONFIRMED").length,
+    },
+    {
+      value: "PREPARING",
+      label: "Chờ Xử Lý",
+      count: orders.filter((o) => o.status === "PREPARING").length,
+    },
+    {
+      value: "READYFORPICKUP",
+      label: "Sẵn Sàng",
+      count: orders.filter((o) => o.status === "READYFORPICKUP").length,
+    },
+    {
+      value: "COMPLETED",
       label: "Hoàn Thành",
-      count: orders.filter((o) => o.status === "completed").length,
+      count: orders.filter((o) => o.status === "COMPLETED").length,
     },
+
     {
-      value: "processing",
-      label: "Đang Xử Lý",
-      count: orders.filter((o) => o.status === "processing").length,
-    },
-    {
-      value: "cancelled",
+      value: "CANCELLED",
       label: "Đã Hủy",
-      count: orders.filter((o) => o.status === "cancelled").length,
+      count: orders.filter((o) => o.status === "CANCELLED").length,
     },
   ];
 
@@ -189,7 +269,7 @@ export default function OrderHistory() {
               />
             </svg>
             <div className="text-amber-700 font-semibold text-lg">
-              Đang tải đơn hàng...
+              Đang xử lý...
             </div>
           </div>
         </div>
@@ -209,19 +289,6 @@ export default function OrderHistory() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="w-24 h-24 bg-gradient-to-br from-amber-600 to-amber-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShoppingBag className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Lịch Sử Đơn Hàng
-          </h1>
-          <p className="text-xl text-gray-600">
-            Theo dõi và quản lý các đơn hàng của bạn
-          </p>
-        </div>
-
         {/* Filters and Search */}
         <div className="bg-white rounded-3xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex flex-col lg:flex-row gap-6">
@@ -297,7 +364,7 @@ export default function OrderHistory() {
                     <div className="flex items-center gap-4 mb-4">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-gray-800 text-lg">
-                          #{order.id}
+                          #{order.code}
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
@@ -585,7 +652,7 @@ export default function OrderHistory() {
 
               {/* Actions */}
               <div className="flex gap-4">
-                {selectedOrder.status === "completed" && (
+                {selectedOrder.status === "COMPLETED" && (
                   <button
                     onClick={() => {
                       handleReorder(selectedOrder);
@@ -597,6 +664,21 @@ export default function OrderHistory() {
                     Đặt Lại Đơn Hàng
                   </button>
                 )}
+
+                {/* Cancel Order Button */}
+                {selectedOrder.status === "NEW" && (
+                  <button
+                    onClick={() => {
+                      cancelOrder(selectedOrder);
+                      setShowModal(false);
+                    }}
+                    className="flex-1 bg-red-500 text-white py-3 rounded-2xl hover:bg-red-600 transition-all duration-300 flex items-center justify-center gap-2"
+                  >
+                    <XCircle className="w-5 h-5" />
+                    Hủy Đơn Hàng
+                  </button>
+                )}
+
                 <button
                   onClick={() => setShowModal(false)}
                   className="flex-1 bg-gray-600 text-white py-3 rounded-2xl hover:bg-gray-700 transition-colors"
