@@ -110,6 +110,11 @@ function ManagerLayout() {
             <FaBoxOpen className="w-5 h-5" />,
             "Khuyến mãi"
           )}
+          {renderNavLink(
+            "/manager/sizes",
+            <FaBoxOpen className="w-5 h-5" />,
+            "Kích thước"
+          )}
 
           {renderNavLink(
             "/manager/staffs",

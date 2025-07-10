@@ -17,7 +17,7 @@ import Staff from "../pages/manager/Staff";
 import Inventory from "../pages/manager/Inventory";
 import MenuManagement from "../pages/manager/MenuManager";
 import Orders from "../pages/pos/Orders";
-import Sales from "../pages/pos/Sales";
+// import Sales from "../pages/pos/Sales";
 import POSLayout from "../components/posLayout";
 import SuccessPage from "../pages/Success";
 import FailedPage from "../pages/Failed";
@@ -33,6 +33,7 @@ import PromotionManagement from "../pages/manager/Promotion";
 import Wallet from "../pages/Wallet";
 import ResetPassword from "../pages/ResetPassword";
 import DepositSuccess from "../pages/DepositSuccess";
+import SizeManagement from "../pages/manager/Size";
 
 const router = createBrowserRouter([
   {
@@ -179,6 +180,7 @@ const router = createBrowserRouter([
         path: "staffs",
         element: <Staff />,
       },
+      { path: "sizes", element: <SizeManagement /> },
     ],
   },
   {
@@ -189,12 +191,13 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      // {
+      //   path: "",
+      //   element: <Sales />,
+      // },
       {
+        // path: "orders",
         path: "",
-        element: <Sales />,
-      },
-      {
-        path: "orders",
         element: <Orders />,
       },
     ],

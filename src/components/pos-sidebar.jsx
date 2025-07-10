@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Coffee,
-  ShoppingCart,
+  // ShoppingCart,
   ClipboardList,
   LogOut,
   ChevronLeft,
@@ -22,15 +22,16 @@ const POSSidebar = () => {
   const dispatch = useDispatch();
 
   const posMenuItems = [
+    // {
+    //   path: "/pos/",
+    //   name: "Bán Hàng",
+    //   nameEn: "Sales",
+    //   icon: ShoppingCart,
+    //   color: "from-green-500 to-green-600",
+    // },
     {
-      path: "/pos/sales",
-      name: "Bán Hàng",
-      nameEn: "Sales",
-      icon: ShoppingCart,
-      color: "from-green-500 to-green-600",
-    },
-    {
-      path: "/pos/orders",
+      // path: "/pos/orders",
+      path: "/pos/",
       name: "Đơn Hàng",
       nameEn: "Orders",
       icon: ClipboardList,

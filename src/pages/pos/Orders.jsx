@@ -9,10 +9,10 @@ import {
   User,
   Phone,
   RefreshCw,
+  Loader,
 } from "lucide-react";
 import orderService from "../../services/order.service";
 import formatCurrency from "../../utils/formatCurrency";
-import formatTime from "../../utils/formatTime";
 import { toast } from "react-toastify";
 import formatDateTime from "../../utils/formatDateTime";
 
@@ -100,21 +100,21 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Start loading
       const data = await orderService.getAllOrders();
       const mappedOrders = mapOrdersData(data.data || []);
       setOrders(mappedOrders);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // End loading
     }
   };
 
   const mapOrdersData = (ordersData) => {
     return ordersData.map((order) => ({
       id: order.id,
-      orderNumber: order.code || order.id,
+      orderNumber: order.code,
       customer: {
         name: order.customerName || order.fullName || "",
         phone: order.phoneNumber || "",
@@ -130,7 +130,8 @@ const Orders = () => {
       discount: order.discountPrice || 0,
       subtotal: order.totalAmount || 0,
       status: order.status ? order.status.toUpperCase() : "",
-      orderTime: order.createAt,
+      createAt: order.createAt || "",
+      orderTime: order.pickUpTime,
       estimatedTime: "",
       paymentMethod: order.payment || "",
       qrCode: order.qRcode || "",
@@ -222,27 +223,9 @@ const Orders = () => {
       {isLoading && (
         <div className="fixed inset-0 bg-white/60 flex items-center justify-center z-50">
           <div className="flex flex-col items-center">
-            <svg
-              className="animate-spin h-10 w-10 text-amber-500 mb-4"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              />
-            </svg>
+            <Loader className="animate-spin h-10 w-10 text-amber-500 mb-4" />
             <div className="text-amber-700 font-semibold text-lg">
-              Đang tải đơn hàng...
+              Đang tải...
             </div>
           </div>
         </div>
@@ -254,9 +237,6 @@ const Orders = () => {
           <h1 className="text-2xl font-bold text-gray-800">Quản Lý Đơn Hàng</h1>
           <p className="text-gray-600 text-sm">Theo dõi và xử lý đơn hàng</p>
         </div>
-        <button className="bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition-colors text-sm">
-          Tạo Đơn Hàng Mới
-        </button>
       </div>
 
       {/* Filters */}
@@ -370,13 +350,15 @@ const Orders = () => {
               </div>
 
               {/* Order Details */}
+
               <div className="mb-2 space-y-1 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Thời gian đặt:</span>
+                  <span className="text-gray-600">Thời gian tạo đơn:</span>
                   <span className="text-gray-800">
-                    {formatTime(order.orderTime)}
+                    {formatDateTime(order?.createAt)}
                   </span>
                 </div>
+
                 {order.paymentMethod && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Thanh toán:</span>
@@ -393,6 +375,12 @@ const Orders = () => {
                     </span>
                   </div>
                 )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Thời gian đặt:</span>
+                  <span className="text-gray-800">
+                    {formatDateTime(order.orderTime)}
+                  </span>
+                </div>
                 <div className="flex justify-between font-bold">
                   <span className="text-gray-800">Tổng cộng:</span>
                   <span className="text-amber-700">
@@ -495,7 +483,9 @@ const Orders = () => {
                     <div>
                       <span className="text-gray-600">Thời gian đặt: </span>
                       <span className="text-gray-800">
-                        {formatDateTime(selectedOrder.orderTime)}
+                        {new Date(selectedOrder.orderTime).toLocaleString(
+                          "vi-VN"
+                        )}
                       </span>
                     </div>
                   </div>
