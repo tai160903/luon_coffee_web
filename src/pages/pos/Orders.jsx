@@ -162,14 +162,20 @@ const Orders = () => {
     try {
       setIsLoading(true);
 
-      const nextStatus = STATUS.NEXT[order.status];
-      if (nextStatus === order.status) {
+      const currentStatusCode = STATUS.STRING_TO_CODE[order.status];
+      const nextStatusCode = currentStatusCode + 1;
+
+      if (!STATUS.CODE_TO_STRING[nextStatusCode]) {
+        toast.error("Không thể cập nhật trạng thái đơn hàng!");
         return;
       }
-      const statusCode = STATUS.STRING_TO_CODE[nextStatus];
-      const res = await orderService.updateStatus(order.id, statusCode);
+
+      const res = await orderService.updateStatus(order.id, nextStatusCode);
       if (res) {
         await fetchOrders();
+        toast.success(
+          `Trạng thái đơn hàng #${order.orderNumber} đã được cập nhật.`
+        );
       }
     } catch (error) {
       toast.error("Cập nhật trạng thái đơn hàng thất bại!");
