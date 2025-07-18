@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import promotionService from "../../services/promotion.service";
+import formatCurrency from "../../utils/formatCurrency";
 
 const PromotionManagement = () => {
   const [promotions, setPromotions] = useState([]);
@@ -139,7 +140,9 @@ const PromotionManagement = () => {
                 <tr key={promo.id} className="border-t">
                   <td className="py-2 px-4 font-semibold">{promo.name}</td>
                   <td className="py-2 px-4">{promo.code}</td>
-                  <td className="py-2 px-4">{promo.condition}</td>
+                  <td className="py-2 px-4">
+                    {formatCurrency(promo.condition)}
+                  </td>
                   <td className="py-2 px-4">{promo.discountPercent}%</td>
                   <td className="py-2 px-4">{promo.description}</td>
                   <td className="py-2 px-4">
@@ -149,7 +152,7 @@ const PromotionManagement = () => {
                     {promo.endDate ? promo.endDate.split("T")[0] : ""}
                   </td>
                   <td className="py-2 px-4">
-                    {promo.status ? (
+                    {promo?.endDate > new Date() ? (
                       <span className="text-green-600 font-bold">
                         Đang hoạt động
                       </span>

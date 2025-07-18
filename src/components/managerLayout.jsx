@@ -116,11 +116,11 @@ function ManagerLayout() {
             "Kích thước"
           )}
 
-          {renderNavLink(
+          {/* {renderNavLink(
             "/manager/staffs",
             <FaUsers className="w-5 h-5" />,
             "Nhân viên"
-          )}
+          )} */}
           {renderNavLink(
             "/manager/customers",
             <FaUsers className="w-5 h-5" />,

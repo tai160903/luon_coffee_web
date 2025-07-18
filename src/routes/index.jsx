@@ -13,7 +13,7 @@ import About from "../pages/About";
 import ManagerLayout from "../components/managerLayout";
 import Dashboard from "../pages/manager/Dashboard";
 import Product from "../pages/manager/Product";
-import Staff from "../pages/manager/Staff";
+// import Staff from "../pages/manager/Staff";
 import Inventory from "../pages/manager/Inventory";
 import MenuManagement from "../pages/manager/MenuManager";
 import Orders from "../pages/pos/Orders";
@@ -176,10 +176,10 @@ const router = createBrowserRouter([
         path: "menu-management",
         element: <MenuManagement />,
       },
-      {
-        path: "staffs",
-        element: <Staff />,
-      },
+      // {
+      //   path: "staffs",
+      //   element: <Staff />,
+      // },
       { path: "sizes", element: <SizeManagement /> },
     ],
   },
