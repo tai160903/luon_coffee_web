@@ -13,7 +13,6 @@ const ToppingManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    description: "",
   });
 
   useEffect(() => {
@@ -45,7 +44,6 @@ const ToppingManagement = () => {
       const toppingData = {
         name: formData.name.trim(),
         price: parseFloat(formData.price),
-        description: formData.description.trim(),
       };
 
       if (editingTopping) {
@@ -71,7 +69,6 @@ const ToppingManagement = () => {
     setFormData({
       name: topping.name,
       price: topping.price.toString(),
-      description: topping.description || "",
     });
     setShowModal(true);
   };
@@ -97,7 +94,6 @@ const ToppingManagement = () => {
     setFormData({
       name: "",
       price: "",
-      description: "",
     });
   };
 
@@ -158,9 +154,6 @@ const ToppingManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Giá
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Mô Tả
-                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Thao Tác
                 </th>
@@ -178,11 +171,6 @@ const ToppingManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 font-semibold">
                         {formatCurrency(topping.price)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-xs truncate">
-                        {topping.description || "Không có mô tả"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -206,7 +194,7 @@ const ToppingManagement = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="3"
                     className="px-6 py-4 text-center text-gray-500"
                   >
                     {searchTerm
@@ -260,21 +248,6 @@ const ToppingManagement = () => {
                     min="0"
                     step="1000"
                     required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mô Tả
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8B4513]"
-                    placeholder="Nhập mô tả topping"
-                    rows="3"
                   />
                 </div>
 
