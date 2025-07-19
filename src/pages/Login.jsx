@@ -415,7 +415,7 @@ const Login = () => {
             {!window.__otpSent ? (
               <>
                 <p className="mb-4 text-gray-600 text-center">
-                  Nhập tên đăng nhập để nhận mã OTP qua email.
+                  Nhập email để nhận mã OTP
                 </p>
                 <input
                   type="text"
@@ -504,7 +504,7 @@ const Login = () => {
                     type="button"
                     className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl transition-all duration-300"
                   >
-                    Nhập lại username
+                    Nhập lại email
                   </button>
                 </div>
                 <button

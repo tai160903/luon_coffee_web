@@ -18,6 +18,7 @@ import ProductService from "../services/product.service";
 import sizeService from "../services/size.service";
 import cartService from "../services/cart.service";
 import formatCurrency from "../utils/formatCurrency";
+import topingService from "../services/topping.service";
 
 const Detail = () => {
   const { id } = useParams();
@@ -33,6 +34,7 @@ const Detail = () => {
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
+  const [toppings, setToppings] = useState([]);
 
   useEffect(() => {
     if (id) {
@@ -46,16 +48,33 @@ const Detail = () => {
       };
       fetchAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Update selectedSize object when selectedSizeId changes
   useEffect(() => {
     if (selectedSizeId) {
       const size = sizes.find((s) => s.id === selectedSizeId);
       setSelectedSize(size);
     }
   }, [selectedSizeId, sizes]);
+
+  useEffect(() => {
+    const fetchToppings = async () => {
+      try {
+        const response = await topingService.getToppings();
+        setToppings(
+          response.data.map((topping) => ({
+            ...topping,
+            selected: false,
+            quantity: 0,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching toppings:", error);
+        toast.error("Không thể tải thông tin topping", { theme: "colored" });
+      }
+    };
+    fetchToppings();
+  }, []);
 
   const fetchProduct = async () => {
     try {
@@ -85,11 +104,36 @@ const Detail = () => {
   const calculateTotalPrice = () => {
     if (!product) return 0;
     const sizePrice = selectedSize?.extraPrice || 0;
-    return (product.price + sizePrice) * quantity;
+    const toppingPrice = toppings.reduce(
+      (total, topping) =>
+        total + (topping.selected ? topping.price * topping.quantity : 0),
+      0
+    );
+    return (product.price + sizePrice + toppingPrice) * quantity;
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
+
+  const handleToppingChange = (toppingId, isSelected) => {
+    setToppings((prev) =>
+      prev.map((topping) =>
+        topping.id === toppingId
+          ? { ...topping, selected: isSelected, quantity: isSelected ? 1 : 0 }
+          : topping
+      )
+    );
+  };
+
+  const handleToppingQuantityChange = (toppingId, newQuantity) => {
+    setToppings((prev) =>
+      prev.map((topping) =>
+        topping.id === toppingId
+          ? { ...topping, quantity: Math.max(0, newQuantity) }
+          : topping
+      )
+    );
+  };
 
   const handleAddToCart = async () => {
     if (!product || !selectedSize) {
@@ -104,7 +148,12 @@ const Detail = () => {
         sizeId: selectedSizeId,
         productId: product.id,
         quantity: quantity,
-        customizeToppings: [],
+        customizeToppings: toppings
+          .filter((topping) => topping.selected && topping.quantity > 0)
+          .map((topping) => ({
+            toppingId: topping.id,
+            quantity: topping.quantity,
+          })),
       };
 
       if (isAuthenticated) {
@@ -236,6 +285,73 @@ const Detail = () => {
                       )}
                     </div>
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Toppings Section */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Chọn Topping
+              </h3>
+              <div className="space-y-3">
+                {toppings.map((topping) => (
+                  <div
+                    key={topping.id}
+                    className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+                      topping.selected
+                        ? "border-amber-500 bg-amber-50"
+                        : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
+                    }`}
+                  >
+                    <label className="flex items-center gap-3 cursor-pointer flex-1">
+                      <input
+                        type="checkbox"
+                        checked={topping.selected}
+                        onChange={(e) =>
+                          handleToppingChange(topping.id, e.target.checked)
+                        }
+                        className="form-checkbox h-5 w-5 text-amber-600"
+                      />
+                      <div>
+                        <span className="font-medium">{topping.name}</span>
+                        <div className="text-sm text-gray-600">
+                          {formatCurrency(topping.price)}
+                        </div>
+                      </div>
+                    </label>
+
+                    {topping.selected && (
+                      <div className="flex items-center border border-gray-300 rounded-lg">
+                        <button
+                          onClick={() =>
+                            handleToppingQuantityChange(
+                              topping.id,
+                              topping.quantity - 1
+                            )
+                          }
+                          disabled={topping.quantity <= 1}
+                          className="p-2 hover:bg-gray-100 rounded-l-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <div className="px-3 py-2 min-w-[40px] text-center font-medium">
+                          {topping.quantity}
+                        </div>
+                        <button
+                          onClick={() =>
+                            handleToppingQuantityChange(
+                              topping.id,
+                              topping.quantity + 1
+                            )
+                          }
+                          className="p-2 hover:bg-gray-100 rounded-r-lg"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
