@@ -294,65 +294,99 @@ const Detail = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 Chọn Topping
               </h3>
-              <div className="space-y-3">
-                {toppings.map((topping) => (
-                  <div
-                    key={topping.id}
-                    className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                      topping.selected
-                        ? "border-amber-500 bg-amber-50"
-                        : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
-                    }`}
-                  >
-                    <label className="flex items-center gap-3 cursor-pointer flex-1">
-                      <input
-                        type="checkbox"
-                        checked={topping.selected}
-                        onChange={(e) =>
-                          handleToppingChange(topping.id, e.target.checked)
-                        }
-                        className="form-checkbox h-5 w-5 text-amber-600"
-                      />
-                      <div>
-                        <span className="font-medium">{topping.name}</span>
-                        <div className="text-sm text-gray-600">
-                          {formatCurrency(topping.price)}
+              <div className="bg-white rounded-2xl border-2 border-gray-200 p-4">
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {toppings.map((topping) => (
+                    <div
+                      key={topping.id}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                        topping.selected
+                          ? "border-amber-300 bg-amber-50"
+                          : "border-gray-200 hover:border-amber-200 hover:bg-amber-50/30"
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer flex-1">
+                        {user && (
+                          <input
+                            type="checkbox"
+                            checked={topping.selected}
+                            onChange={(e) =>
+                              handleToppingChange(topping.id, e.target.checked)
+                            }
+                            className="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500 focus:ring-2"
+                          />
+                        )}
+                        <div className="flex items-center justify-between w-full">
+                          <div>
+                            <span className="font-medium text-gray-800">
+                              {topping.name}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-semibold text-amber-700">
+                              {formatCurrency(topping.price)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </label>
+                      </label>
 
-                    {topping.selected && (
-                      <div className="flex items-center border border-gray-300 rounded-lg">
-                        <button
-                          onClick={() =>
-                            handleToppingQuantityChange(
-                              topping.id,
-                              topping.quantity - 1
-                            )
-                          }
-                          disabled={topping.quantity <= 1}
-                          className="p-2 hover:bg-gray-100 rounded-l-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <div className="px-3 py-2 min-w-[40px] text-center font-medium">
-                          {topping.quantity}
+                      {topping.selected && (
+                        <div className="flex items-center ml-3 bg-white border border-gray-300 rounded-lg">
+                          <button
+                            onClick={() =>
+                              handleToppingQuantityChange(
+                                topping.id,
+                                topping.quantity - 1
+                              )
+                            }
+                            disabled={topping.quantity <= 1}
+                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-l-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <div className="w-12 h-8 flex items-center justify-center text-sm font-medium">
+                            {topping.quantity}
+                          </div>
+                          <button
+                            onClick={() =>
+                              handleToppingQuantityChange(
+                                topping.id,
+                                topping.quantity + 1
+                              )
+                            }
+                            className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-r-lg transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() =>
-                            handleToppingQuantityChange(
-                              topping.id,
-                              topping.quantity + 1
-                            )
-                          }
-                          className="p-2 hover:bg-gray-100 rounded-r-lg"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {toppings.filter((t) => t.selected).length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">
+                        Đã chọn {toppings.filter((t) => t.selected).length}{" "}
+                        topping
+                      </span>
+                      <span className="font-semibold text-amber-700">
+                        +
+                        {formatCurrency(
+                          toppings.reduce(
+                            (total, topping) =>
+                              total +
+                              (topping.selected
+                                ? topping.price * topping.quantity
+                                : 0),
+                            0
+                          )
+                        )}
+                      </span>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
