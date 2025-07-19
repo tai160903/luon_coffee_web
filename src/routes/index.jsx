@@ -34,6 +34,7 @@ import Wallet from "../pages/Wallet";
 import ResetPassword from "../pages/ResetPassword";
 import DepositSuccess from "../pages/DepositSuccess";
 import SizeManagement from "../pages/manager/Size";
+import ToppingManagement from "../pages/manager/Topping";
 
 const router = createBrowserRouter([
   {
@@ -181,6 +182,7 @@ const router = createBrowserRouter([
       //   element: <Staff />,
       // },
       { path: "sizes", element: <SizeManagement /> },
+      { path: "toppings", element: <ToppingManagement /> },
     ],
   },
   {
