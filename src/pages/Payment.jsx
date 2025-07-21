@@ -44,7 +44,7 @@ const Payment = () => {
     },
     {
       id: "payos",
-      name: "PayOS",
+      name: "Thanh toán online",
       description: "Thanh toán qua PayOS",
       icon: CreditCard,
       color: "from-blue-500 to-blue-600",

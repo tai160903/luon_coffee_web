@@ -29,7 +29,7 @@ const DepositSuccess = () => {
           const orderData = response.data.data;
           if (orderData.status === "PAID") {
             setData(orderData);
-            dispatch(updateWalletBalance(orderData.amount));
+            dispatch(updateWalletBalance(orderData.wallet));
           } else {
             setMessage("Giao dịch không hợp lệ hoặc đã bị hủy.");
           }
