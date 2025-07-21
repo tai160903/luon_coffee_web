@@ -40,7 +40,7 @@ const DepositSuccess = () => {
         console.error("Error fetching deposit order:", error);
         setMessage("Đã xảy ra lỗi khi tải thông tin giao dịch.");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 

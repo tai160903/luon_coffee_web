@@ -1,62 +1,47 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  User,
-  Phone,
-  Mail,
-  Calendar,
-  Star,
-  Eye,
-  X,
-  Save,
-} from "lucide-react";
+import { Search, User, Phone, Mail, Eye, X, Loader2 } from "lucide-react";
 import userService from "../../services/user.service";
 import formatCurrency from "../../utils/formatCurrency";
 
 const Customers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [editingCustomer, setEditingCustomer] = useState(null);
-
-  const [newCustomer, setNewCustomer] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    dateOfBirth: "",
-    address: "",
-  });
+  const [loading, setLoading] = useState(true);
 
   const [customers, setCustomers] = useState([]);
 
   useEffect(() => {
     const fetchCustomers = async () => {
-      const res = await userService.getAllCustomer();
-      if (res && res.data.data) {
-        const mapped = res.data.data.map((c) => ({
-          id: c.id,
-          name: c.fullName,
-          phone: c.phoneNumber,
-          email: c.email || "",
-          dateOfBirth: c.birthDate ? c.birthDate.split("T")[0] : "",
-          address: c.address || "",
-          joinDate: c.createdDate ? c.createdDate.split("T")[0] : "",
-          totalOrders: c.totalOrders || 0,
-          totalSpent: c.wallet || 0,
-          lastVisit: c.lastVisit || "",
-          tier: c.tier || "new",
-          points: c.points || 0,
-          favoriteItems: c.favoriteItems || [],
-          notes: c.notes || "",
-        }));
-        setCustomers(mapped);
+      setLoading(true);
+      try {
+        const res = await userService.getAllCustomer();
+        if (res && res.data.data) {
+          const mapped = res.data.data.map((c) => ({
+            id: c.id,
+            name: c.fullName || c.username,
+            phone: c.phoneNumber,
+            email: c.email || "",
+            dateOfBirth: c.birthDate ? c.birthDate.split("T")[0] : "",
+            address: c.address || "",
+            joinDate: c.createdDate ? c.createdDate.split("T")[0] : "",
+            totalOrders: c.totalOrders || 0,
+            totalSpent: c.wallet || 0,
+            lastVisit: c.lastVisit || "",
+            tier: c.tier || "new",
+            points: c.points || 0,
+            favoriteItems: c.favoriteItems || [],
+            notes: c.notes || "",
+          }));
+          setCustomers(mapped);
+        }
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCustomers();
@@ -72,6 +57,7 @@ const Customers = () => {
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
       customer.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customer.phone?.includes(searchQuery) ||
       customer.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -107,51 +93,18 @@ const Customers = () => {
     }
   };
 
-  const handleAddCustomer = () => {
-    if (!newCustomer.name || !newCustomer.phone) return;
-
-    const customer = {
-      id: Date.now(),
-      ...newCustomer,
-      joinDate: new Date().toISOString().split("T")[0],
-      totalOrders: 0,
-      totalSpent: 0,
-      lastVisit: new Date().toISOString().split("T")[0],
-      tier: "new",
-      points: 0,
-      favoriteItems: [],
-      notes: "",
-    };
-
-    setCustomers([...customers, customer]);
-    setNewCustomer({
-      name: "",
-      phone: "",
-      email: "",
-      dateOfBirth: "",
-      address: "",
-    });
-    setShowAddModal(false);
-  };
-
-  const handleEditCustomer = (customer) => {
-    setEditingCustomer({ ...customer });
-  };
-
-  const handleSaveEdit = () => {
-    setCustomers(
-      customers.map((customer) =>
-        customer.id === editingCustomer.id ? editingCustomer : customer
-      )
+  if (loading) {
+    return (
+      <div className="p-6 bg-gradient-to-br from-amber-50 to-white min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Loader2 className="w-12 h-12 text-amber-600 animate-spin mb-4" />
+          <div className="text-lg text-amber-700 font-semibold">
+            Đang tải danh sách khách hàng...
+          </div>
+        </div>
+      </div>
     );
-    setEditingCustomer(null);
-  };
-
-  const handleDeleteCustomer = (id) => {
-    if (confirm("Bạn có chắc chắn muốn xóa khách hàng này?")) {
-      setCustomers(customers.filter((customer) => customer.id !== id));
-    }
-  };
+  }
 
   return (
     <div className="p-6 bg-gradient-to-br from-amber-50 to-white min-h-screen">
@@ -163,13 +116,6 @@ const Customers = () => {
           </h1>
           <p className="text-gray-600">Theo dõi và chăm sóc khách hàng</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-amber-600 text-white px-6 py-3 rounded-2xl hover:bg-amber-700 transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Thêm Khách Hàng
-        </button>
       </div>
 
       {/* Filters */}
@@ -220,21 +166,10 @@ const Customers = () => {
                   <User className="w-6 h-6 text-amber-700" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800">{customer.name}</h3>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getTierColor(
-                      customer.tier
-                    )}`}
-                  >
-                    {getTierName(customer.tier)}
-                  </span>
+                  <h3 className="font-bold text-gray-800">
+                    {customer.name ?? customer.username ?? "Unknown User"}
+                  </h3>
                 </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span className="text-sm font-medium text-gray-600">
-                  {customer.points}
-                </span>
               </div>
             </div>
 
@@ -242,22 +177,15 @@ const Customers = () => {
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Phone className="w-4 h-4" />
-                <span>{customer.phone}</span>
+                <span>{customer.phone || "Chưa có số điện thoại"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Mail className="w-4 h-4" />
-                <span>{customer.email}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4" />
-                <span>
-                  Tham gia:{" "}
-                  {new Date(customer.joinDate).toLocaleDateString("vi-VN")}
-                </span>
+                <span>{customer.email || "Chưa có email"}</span>
               </div>
             </div>
 
-            {/* Customer Stats */}
+            {/* Customer Stats
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center p-3 bg-gray-50 rounded-2xl">
                 <div className="text-lg font-bold text-gray-800">
@@ -271,10 +199,10 @@ const Customers = () => {
                 </div>
                 <div className="text-xs text-gray-600">Tổng chi tiêu</div>
               </div>
-            </div>
+            </div> */}
 
             {/* Favorite Items */}
-            {customer.favoriteItems.length > 0 && (
+            {/* {customer.favoriteItems.length > 0 && (
               <div className="mb-4">
                 <div className="text-sm font-semibold text-gray-700 mb-2">
                   Món yêu thích:
@@ -295,7 +223,7 @@ const Customers = () => {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Actions */}
             <div className="flex gap-2">
@@ -304,146 +232,15 @@ const Customers = () => {
                   setSelectedCustomer(customer);
                   setShowDetailModal(true);
                 }}
-                className="flex-1 bg-blue-100 text-blue-600 py-2 rounded-xl hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-blue-100 text-blue-600 py-2 rounded-xl hover:bg-blue-200 transition-colors flex items-center justify-center gap-2"
               >
                 <Eye className="w-4 h-4" />
                 Chi Tiết
-              </button>
-              <button
-                onClick={() => handleEditCustomer(customer)}
-                className="flex-1 bg-green-100 text-green-600 py-2 rounded-xl hover:bg-green-200 transition-colors flex items-center justify-center gap-2"
-              >
-                <Edit className="w-4 h-4" />
-                Sửa
-              </button>
-              <button
-                onClick={() => handleDeleteCustomer(customer.id)}
-                className="px-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors flex items-center justify-center"
-              >
-                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Add Customer Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">
-                Thêm Khách Hàng Mới
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Họ và tên *
-                  </label>
-                  <input
-                    type="text"
-                    value={newCustomer.name}
-                    onChange={(e) =>
-                      setNewCustomer({ ...newCustomer, name: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                    placeholder="Nhập họ và tên"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Số điện thoại *
-                  </label>
-                  <input
-                    type="tel"
-                    value={newCustomer.phone}
-                    onChange={(e) =>
-                      setNewCustomer({ ...newCustomer, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                    placeholder="Nhập số điện thoại"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={newCustomer.email}
-                    onChange={(e) =>
-                      setNewCustomer({ ...newCustomer, email: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                    placeholder="Nhập email"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Ngày sinh
-                  </label>
-                  <input
-                    type="date"
-                    value={newCustomer.dateOfBirth}
-                    onChange={(e) =>
-                      setNewCustomer({
-                        ...newCustomer,
-                        dateOfBirth: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Địa chỉ
-                </label>
-                <textarea
-                  value={newCustomer.address}
-                  onChange={(e) =>
-                    setNewCustomer({ ...newCustomer, address: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none resize-none"
-                  rows={3}
-                  placeholder="Nhập địa chỉ"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-2xl hover:bg-gray-300 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleAddCustomer}
-                  className="flex-1 bg-amber-600 text-white py-3 rounded-2xl hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Save className="w-5 h-5" />
-                  Thêm Khách Hàng
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Customer Detail Modal */}
       {showDetailModal && selectedCustomer && (
@@ -570,113 +367,6 @@ const Customers = () => {
                     <p className="text-gray-700">{selectedCustomer.notes}</p>
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Customer Modal */}
-      {editingCustomer && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">
-                Chỉnh Sửa Khách Hàng
-              </h3>
-              <button
-                onClick={() => setEditingCustomer(null)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-xl"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Họ và tên *
-                  </label>
-                  <input
-                    type="text"
-                    value={editingCustomer.name}
-                    onChange={(e) =>
-                      setEditingCustomer({
-                        ...editingCustomer,
-                        name: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Số điện thoại *
-                  </label>
-                  <input
-                    type="tel"
-                    value={editingCustomer.phone}
-                    onChange={(e) =>
-                      setEditingCustomer({
-                        ...editingCustomer,
-                        phone: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={editingCustomer.email}
-                  onChange={(e) =>
-                    setEditingCustomer({
-                      ...editingCustomer,
-                      email: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Ghi chú
-                </label>
-                <textarea
-                  value={editingCustomer.notes}
-                  onChange={(e) =>
-                    setEditingCustomer({
-                      ...editingCustomer,
-                      notes: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:outline-none resize-none"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setEditingCustomer(null)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-2xl hover:bg-gray-300 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleSaveEdit}
-                  className="flex-1 bg-amber-600 text-white py-3 rounded-2xl hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Save className="w-5 h-5" />
-                  Lưu Thay Đổi
-                </button>
               </div>
             </div>
           </div>

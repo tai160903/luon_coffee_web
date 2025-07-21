@@ -5,185 +5,116 @@ import {
   BarChart3,
   ShoppingCart,
   Users,
-  Package,
-  Settings,
-  FileText,
   Coffee,
-  UserCheck,
   TrendingUp,
   Calendar,
   Clock,
   DollarSign,
+  Loader2,
 } from "lucide-react";
 import dashboardService from "../../services/dashboard.service";
+import formatCurrency from "../../utils/formatCurrency";
 
 const ManagerDashboard = () => {
-  const [activeSection, setActiveSection] = useState("overview");
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
+    monthlyRevenue: 0,
+    monthlyOrders: 0,
   });
 
-  const menuItems = [
-    {
-      id: "overview",
-      name: "Tổng Quan",
-      icon: BarChart3,
-      description: "Dashboard và thống kê tổng quan",
-      color: "from-blue-500 to-blue-600",
-    },
-    {
-      id: "orders",
-      name: "Quản Lý Đơn Hàng",
-      icon: ShoppingCart,
-      description: "Theo dõi và xử lý đơn hàng",
-      color: "from-green-500 to-green-600",
-    },
-    {
-      id: "menu",
-      name: "Quản Lý Thực Đơn",
-      icon: Coffee,
-      description: "Thêm, sửa, xóa món ăn và đồ uống",
-      color: "from-amber-500 to-amber-600",
-    },
-    {
-      id: "customers",
-      name: "Quản Lý Khách Hàng",
-      icon: Users,
-      description: "Theo dõi và chăm sóc khách hàng",
-      color: "from-purple-500 to-purple-600",
-    },
-    {
-      id: "staff",
-      name: "Quản Lý Nhân Viên",
-      icon: UserCheck,
-      description: "Quản lý đội ngũ nhân viên",
-      color: "from-indigo-500 to-indigo-600",
-    },
-    {
-      id: "inventory",
-      name: "Quản Lý Kho",
-      icon: Package,
-      description: "Theo dõi và quản lý tồn kho",
-      color: "from-red-500 to-red-600",
-    },
-    {
-      id: "reports",
-      name: "Báo Cáo",
-      icon: FileText,
-      description: "Báo cáo doanh thu và thống kê",
-      color: "from-teal-500 to-teal-600",
-    },
-    {
-      id: "settings",
-      name: "Cài Đặt",
-      icon: Settings,
-      description: "Cấu hình hệ thống",
-      color: "from-gray-500 to-gray-600",
-    },
-  ];
+  useEffect(() => {
+    const fetchAllStats = async () => {
+      setLoading(true);
+      try {
+        // Fetch today's stats
+        const todayResponse = await dashboardService.getTodayStats();
 
-  const quickStats = [
-    {
-      title: "Doanh Thu Hôm Nay",
-      value: "2,450,000₫",
-      change: "+12.5%",
-      icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
+        // Fetch monthly stats
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        const monthlyResponse = await dashboardService.getMonthlyStats(
+          month,
+          year
+        );
+
+        setStats({
+          totalOrders: todayResponse.data.totalOrders || 0,
+          totalRevenue: todayResponse.data.totalRevenue || 0,
+          monthlyRevenue: monthlyResponse?.data?.totalRevenue || 0,
+          monthlyOrders: monthlyResponse?.data?.totalOrders || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+        setStats({
+          totalOrders: 0,
+          totalRevenue: 0,
+          monthlyRevenue: 0,
+          monthlyOrders: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllStats();
+  }, []);
+
+  const statsCards = [
     {
       title: "Đơn Hàng Hôm Nay",
-      value: "87",
-      change: "+8.2%",
+      value: stats.totalOrders,
       icon: ShoppingCart,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
+      format: "number",
     },
     {
-      title: "Khách Hàng Mới",
-      value: "12",
-      change: "+15.3%",
-      icon: Users,
+      title: "Doanh Thu Hôm Nay",
+      value: stats.totalRevenue,
+      icon: DollarSign,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+      format: "currency",
+    },
+    {
+      title: "Doanh Thu Tháng Này",
+      value: stats.monthlyRevenue,
+      icon: BarChart3,
+      color: "text-teal-600",
+      bgColor: "bg-teal-100",
+      format: "currency",
+    },
+    {
+      title: "Đơn Hàng Tháng Này",
+      value: stats.monthlyOrders,
+      icon: ShoppingCart,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
-    },
-    {
-      title: "Hiệu Suất",
-      value: "94%",
-      change: "+2.1%",
-      icon: TrendingUp,
-      color: "text-amber-600",
-      bgColor: "bg-amber-100",
+      format: "number",
     },
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: "order",
-      message: "Đơn hàng #1234 đã được hoàn thành",
-      time: "5 phút trước",
-      icon: ShoppingCart,
-      color: "text-green-600",
-    },
-    {
-      id: 2,
-      type: "customer",
-      message: "Khách hàng mới Nguyễn Văn An đã đăng ký",
-      time: "10 phút trước",
-      icon: Users,
-      color: "text-blue-600",
-    },
-    {
-      id: 3,
-      type: "inventory",
-      message: "Cà phê Arabica sắp hết hàng",
-      time: "15 phút trước",
-      icon: Package,
-      color: "text-red-600",
-    },
-    {
-      id: 4,
-      type: "staff",
-      message: "Nhân viên Trần Thị B đã check-in",
-      time: "30 phút trước",
-      icon: UserCheck,
-      color: "text-purple-600",
-    },
-  ];
+  const formatValue = (value, format) => {
+    if (format === "currency") {
+      return formatCurrency(value);
+    }
+    return value?.toLocaleString("vi-VN") || "0";
+  };
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await dashboardService.getTodayStats();
-        setStats(response.data);
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    const fetchMonthlyStats = async () => {
-      try {
-        const month = new Date().getMonth() + 1;
-        const year = new Date().getFullYear();
-        const response = await dashboardService.getMonthlyStats(month, year);
-        setStats((prevStats) => ({
-          ...prevStats,
-          monthlyRevenue: response?.data?.totalRevenue,
-          monthlyOrders: response?.data?.totalOrders,
-        }));
-      } catch (error) {
-        console.error("Error fetching monthly stats:", error);
-      }
-    };
-
-    fetchMonthlyStats();
-  }, []);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Loader2 className="w-12 h-12 text-amber-600 animate-spin mb-4" />
+          <div className="text-lg text-amber-700 font-semibold">
+            Đang tải dữ liệu...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white">
@@ -213,51 +144,74 @@ const ManagerDashboard = () => {
         </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-blue-600" />
+          {statsCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={index}
+                className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className={`w-12 h-12 ${card.bgColor} rounded-2xl flex items-center justify-center`}
+                  >
+                    <Icon className={`w-6 h-6 ${card.color}`} />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-gray-800 mb-1">
+                  {formatValue(card.value, card.format)}
+                </div>
+                <div className="text-gray-600 text-sm">{card.title}</div>
               </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-800 mb-1">
-              {stats.totalOrders}
-            </div>
-            <div className="text-gray-600 text-sm">Đơn Hàng Hôm Nay</div>
-          </div>
-          <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-800 mb-1">
-              {stats.totalRevenue.toLocaleString("vi-VN")}₫
-            </div>
-            <div className="text-gray-600 text-sm">Doanh Thu Hôm Nay</div>
-          </div>
-          <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-teal-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-800 mb-1">
-              {stats.monthlyRevenue?.toLocaleString("vi-VN")}₫
-            </div>
-            <div className="text-gray-600 text-sm">Doanh Thu Tháng Này</div>
-          </div>
-          <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-800 mb-1">
-              {stats.monthlyOrders}
-            </div>
-            <div className="text-gray-600 text-sm">Đơn Hàng Tháng Này</div>
+            );
+          })}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Truy Cập Nhanh
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a
+              href="/manager/orders"
+              className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-colors group"
+            >
+              <ShoppingCart className="w-8 h-8 text-gray-600 group-hover:text-amber-600 mb-2" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700">
+                Đơn Hàng
+              </span>
+            </a>
+            <a
+              href="/manager/products"
+              className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-colors group"
+            >
+              <Coffee className="w-8 h-8 text-gray-600 group-hover:text-amber-600 mb-2" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700">
+                Sản Phẩm
+              </span>
+            </a>
+            <a
+              href="/manager/customers"
+              className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-colors group"
+            >
+              <Users className="w-8 h-8 text-gray-600 group-hover:text-amber-600 mb-2" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700">
+                Khách Hàng
+              </span>
+            </a>
+            <a
+              href="/manager/promotions"
+              className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 hover:border-amber-300 hover:bg-amber-50 transition-colors group"
+            >
+              <TrendingUp className="w-8 h-8 text-gray-600 group-hover:text-amber-600 mb-2" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-amber-700">
+                Khuyến Mãi
+              </span>
+            </a>
           </div>
         </div>
       </div>

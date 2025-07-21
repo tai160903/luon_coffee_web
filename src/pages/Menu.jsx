@@ -304,12 +304,22 @@ function Menu() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-12">
             <ReactPaginate
-              previousLabel={"<"}
-              nextLabel={">"}
+              previousLabel={
+                <div className="flex items-center gap-2">
+                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  <span className="hidden sm:inline">Trước</span>
+                </div>
+              }
+              nextLabel={
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline">Tiếp</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              }
               breakLabel={"..."}
-              breakClassName={"px-2"}
+              breakClassName={"flex items-center"}
               pageCount={totalPages}
               forcePage={currentPage - 1}
               marginPagesDisplayed={2}
@@ -317,19 +327,25 @@ function Menu() {
               onPageChange={(selectedItem) =>
                 setCurrentPage(selectedItem.selected + 1)
               }
-              containerClassName={"inline-flex rounded-md shadow-sm"}
+              containerClassName={"flex items-center gap-2"}
               pageClassName={
-                "px-4 py-2 border-t border-b border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+                "w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 cursor-pointer font-medium"
               }
-              pageLinkClassName={""}
+              pageLinkClassName={
+                "w-full h-full flex items-center justify-center"
+              }
               previousClassName={
-                "px-4 py-2 rounded-l-md border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+                "flex items-center justify-center px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 cursor-pointer font-medium"
               }
               nextClassName={
-                "px-4 py-2 rounded-r-md border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 transition"
+                "flex items-center justify-center px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition-all duration-200 cursor-pointer font-medium"
               }
-              activeClassName={"bg-amber-500 text-white font-bold"}
-              disabledClassName={"opacity-50 cursor-not-allowed"}
+              activeClassName={
+                "!bg-gradient-to-r !from-amber-500 !to-amber-600 !text-white !border-amber-500 shadow-lg transform scale-105"
+              }
+              disabledClassName={
+                "!opacity-50 !cursor-not-allowed !hover:bg-white !hover:border-gray-200 !hover:text-gray-700"
+              }
             />
           </div>
         )}
