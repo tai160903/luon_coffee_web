@@ -72,7 +72,7 @@ const authSlice = createSlice({
     },
     updateWalletBalance: (state, action) => {
       if (state.user) {
-        state.user.wallet = action.payload;
+        state.user.wallet = state.user.wallet + action.payload;
       }
     },
     logout: (state) => {

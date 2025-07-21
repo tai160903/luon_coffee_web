@@ -19,7 +19,7 @@ const Wallet = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [topupAmount, setTopupAmount] = useState(100000);
   const [showTopupModal, setShowTopupModal] = useState(false);
-  const [history, setHistory] = useState([]); // Add state for wallet history
+  const [history, setHistory] = useState([]);
   const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {

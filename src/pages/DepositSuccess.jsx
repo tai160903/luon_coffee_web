@@ -19,7 +19,7 @@ const DepositSuccess = () => {
       const topUpCode = searchParams.get("topUpCode");
       if (!topUpCode) {
         setMessage("Không tìm thấy mã giao dịch.");
-        setLoading(false); // Stop loading
+        setLoading(false);
         return;
       }
 

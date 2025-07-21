@@ -296,8 +296,21 @@ const Login = () => {
               </button>
             </span>
           </div>
+          {/* navigate to register */}
+          <div className="mt-6 text-center">
+            <span className="text-sm text-gray-500">
+              Chưa có tài khoản?{" "}
+              <Link
+                to="/register"
+                className="text-amber-600 hover:underline font-semibold"
+              >
+                Đăng ký ngay
+              </Link>
+            </span>
+          </div>
         </div>
       </div>
+
       {/* Forgot Password Modal */}
       {showForgotPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">

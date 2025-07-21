@@ -316,23 +316,6 @@ const Register = () => {
                 Đăng nhập ngay
               </Link>
             </p>
-            <p className="mt-4">
-              Bằng việc đăng ký, bạn đồng ý với chúng tôi về{" "}
-              <Link
-                to="/terms"
-                className="text-amber-600 hover:text-amber-700 font-semibold"
-              >
-                Điều khoản dịch vụ
-              </Link>{" "}
-              và{" "}
-              <Link
-                to="/privacy"
-                className="text-amber-600 hover:text-amber-700 font-semibold"
-              >
-                Chính sách bảo mật
-              </Link>
-              .
-            </p>
           </div>
         </div>
       </div>
