@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, User, Phone, Mail, Eye, X, Loader2 } from "lucide-react";
 import userService from "../../services/user.service";
 import formatCurrency from "../../utils/formatCurrency";
+import formatDate from "../../utils/formatDate";
 
 const Customers = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -323,17 +324,13 @@ const Customers = () => {
                     <div>
                       <div className="text-sm text-gray-600">Ngày sinh</div>
                       <div className="font-medium text-gray-800">
-                        {new Date(
-                          selectedCustomer.dateOfBirth
-                        ).toLocaleDateString("vi-VN")}
+                        {formatDate(selectedCustomer.dateOfBirth)}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-600">Tham gia</div>
                       <div className="font-medium text-gray-800">
-                        {new Date(selectedCustomer.joinDate).toLocaleDateString(
-                          "vi-VN"
-                        )}
+                        {formatDate(selectedCustomer.joinDate)}
                       </div>
                     </div>
                   </div>

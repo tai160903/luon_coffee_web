@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import dashboardService from "../../services/dashboard.service";
 import formatCurrency from "../../utils/formatCurrency";
+import formatDate from "../../utils/formatDate";
 
 const ManagerDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -133,7 +134,7 @@ const ManagerDashboard = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                <span>{new Date().toLocaleString("vi-VN")}</span>
+                <span>{formatDate(new Date().toISOString())}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4" />

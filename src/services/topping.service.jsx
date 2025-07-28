@@ -1,6 +1,6 @@
 import instance from "../utils/instance";
 
-const topingService = {
+const toppingService = {
   getToppings: async () => {
     try {
       const response = await instance.get("/Topping");
@@ -48,4 +48,4 @@ const topingService = {
   },
 };
 
-export default topingService;
+export default toppingService;

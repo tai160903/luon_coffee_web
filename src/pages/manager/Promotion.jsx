@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import promotionService from "../../services/promotion.service";
 import formatCurrency from "../../utils/formatCurrency";
+import formatDate from "../../utils/formatDate";
 
 const PromotionManagement = () => {
   const [promotions, setPromotions] = useState([]);
@@ -145,19 +146,15 @@ const PromotionManagement = () => {
                   </td>
                   <td className="py-2 px-4">{promo.discountPercent}%</td>
                   <td className="py-2 px-4">{promo.description}</td>
+                  <td className="py-2 px-4">{formatDate(promo.startDate)}</td>
+                  <td className="py-2 px-4">{formatDate(promo.endDate)}</td>
                   <td className="py-2 px-4">
-                    {promo.startDate ? promo.startDate.split("T")[0] : ""}
-                  </td>
-                  <td className="py-2 px-4">
-                    {promo.endDate ? promo.endDate.split("T")[0] : ""}
-                  </td>
-                  <td className="py-2 px-4">
-                    {promo?.endDate > new Date() ? (
+                    {new Date(promo.endDate) >= new Date() ? (
                       <span className="text-green-600 font-bold">
                         Đang hoạt động
                       </span>
                     ) : (
-                      <span className="text-gray-400">Ngừng</span>
+                      <span className="text-red-600 font-bold">Đã hết hạn</span>
                     )}
                   </td>
                   <td className="py-2 px-4 flex gap-2">
